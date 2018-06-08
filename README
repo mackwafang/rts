@@ -1,0 +1,6 @@
+rts (name TBD) by mackwafang:
+
+ver 0.2:
+	- Fighters vs. fighters combat implemented
+	- Fighters vs. bombers combat partially implemented.
+	- Fighters now turn slightly more sharply when enemies are out of range.
