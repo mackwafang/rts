@@ -297,7 +297,7 @@ for (var i = 0; i &lt; squadSize; i++) {
         hp += squadMember[i].hp;
     }
 }
-draw_text_colour(((x-view_xview[0])*windowRatio_x)+lengthdir_x(30,direction-180),((y-view_yview[0])*windowRatio_y)+lengthdir_y(15,direction-180),"("+string(membersAlive)+")#"+string(ceil(hp)),colour,colour,colour,colour,1);
+draw_text_colour(((x-view_xview[0])*windowRatio_x)+lengthdir_x(30,direction-180),((y-view_yview[0])*windowRatio_y)+lengthdir_y(15,direction-180),string(membersAlive)+"/"+string(squadSize),colour,colour,colour,colour,1);
 //draw_circle_colour(x,y,engageRange,colour,colour,true);
 //draw_text_colour(x,y-10,string(membersAlive)+"/"+string(squadSize),colour,colour,colour,colour,1);
 </string>

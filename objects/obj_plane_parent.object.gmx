@@ -178,7 +178,6 @@ if ((!takeOff &amp;&amp; !landing)) {
     image_index = clamp(-(turnRate*4)+15,0,image_number-1);
     speed = var_wipe(speed,moveSpeed,200,0,0.1);
     direction += turnRate*turnRateCof;
-    image_angle = direction
 }
 else {
     if (takeOff) {
@@ -196,7 +195,8 @@ else {
         }
     }
 }
-    propellerIndex = (++propellerIndex) mod 4;
+image_angle = direction
+propellerIndex = (++propellerIndex) mod 4;
 if (!canMove) {speed = 0;}
 </string>
           </argument>

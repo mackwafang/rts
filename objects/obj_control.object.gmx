@@ -50,10 +50,10 @@ global.mapView = false;
           <argument>
             <kind>1</kind>
             <string>if (mouse_check_button_pressed(mb_left)) {
-    createSquad(mouse_x,mouse_y,instance_number(obj_squad),6,obj_ally_plane,true,obj_runway,true);
+    createSquad(mouse_x,mouse_y,instance_number(obj_squad),6,obj_ally_plane,true,100001,true);
 }
 if (mouse_check_button_pressed(mb_right)) {
-    createSquad(mouse_x,mouse_y,instance_number(obj_squad),6,obj_enemy_plane,false,noone,true);
+    createSquad(mouse_x,mouse_y,instance_number(obj_squad),6,obj_enemy_plane,false,100002,true);
 }
 /* view scaling */
 if (mouse_wheel_up()) {

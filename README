@@ -1,5 +1,9 @@
 rts (name TBD) by mackwafang:
 
+ver 0.3.1:
+	- Changes to squad creation (temporary):
+		+ If takeoff point is specified, squad starts at takeoff point.
+
 ver 0.3:
 	- Added planes taking off from a runway/carrier
 

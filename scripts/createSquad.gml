@@ -14,6 +14,7 @@ if (argument_count >= 8) {
     aiControl = argument[7];
 }
 
+
 var s = instance_create(xx,yy,obj_squad);
 s.squadNumber = squadNumber;
 s.planeType = planeType;
@@ -30,6 +31,10 @@ if (takeOffFrom == noone) {
     }
 }
 else {
+    s.x = takeOffFrom.x;
+    s.y = takeOffFrom.y;
+    s.dest_x = xx;
+    s.dest_y = yy;
     s.planesTakingOff = true;
     ds_queue_enqueue(takeOffFrom.squadQueue,s);
     takeOffFrom.takeOff = true;

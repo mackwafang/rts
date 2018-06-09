@@ -30,7 +30,6 @@ takeOff = false;
 landing = false;
 
 
-planeType = undefined; //plane type to send out
 planesRequired = 0; //number of planes required to send out or take in
 squadQueue = ds_queue_create();
 useTime = 0; //takeoff/landing time
@@ -81,15 +80,20 @@ maxUseTime = 60;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>/* take off */
+            <string>image_angle = direction;
+/* take off */
 if (takeOff) {
     if (useTime &lt; 0) {
         if (planesRequired &gt; 0) {
             /* send a plane out */
-            sendPlaneToSquad.squadMember[sendPlaneToSquad.squadSize-planesRequired] = createPlane(x,y,direction,planeType,sendPlaneToSquad,isAlly,id);
+            sendPlaneToSquad.squadMember[sendPlaneToSquad.squadSize-planesRequired] = createPlane(x,y,direction,sendPlaneToSquad.planeType,sendPlaneToSquad,sendPlaneToSquad.isAlly,id);
             with(sendPlaneToSquad) {
                 if (isEngaged) {
-                    assignEnemy(engageSquad);
+                    if (engageSquad != undefined) {
+                        if (instance_exists(engageSquad)) {
+                            assignEnemy(engageSquad);
+                        }
+                    }
                 }
             }
             print("sending out an aircraft, "+string(planesRequired)+" planes left");
