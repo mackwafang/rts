@@ -28,6 +28,9 @@
             <string>canMove = true;
 canShoot = true;
 isAlly = true;
+takeOff = false;
+landing = false;
+takeOffFrom = noone;
 
 baseMoveSpeed = 4;
 moveSpeed = 4;
@@ -85,41 +88,71 @@ if (hp &lt;= 0) {
 }
 /* chasing target */
 var turnRate = 0;
-if (chaseTarget != undefined) {
-    if (instance_exists(chaseTarget)) {
-        var anyEnemy = collision_line(x,y,x+lengthdir_x(fovRange,direction),y+lengthdir_y(fovRange,direction),obj_plane_parent,false,false);
-        var foundAnyEnemy = false;
-        if (anyEnemy != noone) {
-            if (anyEnemy.isAlly != isAlly) {
-                foundAnyEnemy = true;
+if ((!takeOff &amp;&amp; !landing)) {
+    if (chaseTarget != undefined) {
+        if (instance_exists(chaseTarget)) {
+            var anyEnemy = collision_line(x,y,x+lengthdir_x(fovRange,direction),y+lengthdir_y(fovRange,direction),obj_plane_parent,false,false);
+            var foundAnyEnemy = false;
+            if (anyEnemy != noone) {
+                if (anyEnemy.isAlly != isAlly) {
+                    foundAnyEnemy = true;
+                }
             }
-        }
-        if (inViewRangeAny(chaseTarget,fovAngle,fovRange)) {
-            /* shoot when in range */
-            if (chaseTarget.object_index != obj_squad) {
-                chaseTimer = 0;
-                if (fire &gt; 0) {
-                    fire -= fireRate;
-                    var dist = point_distance(x,y,x,y+6);
-                    var dir = image_angle+point_direction(x,y,x,y+6);
-                    shootBullet(x+lengthdir_x(dist,dir),y+lengthdir_y(dist,dir),20,direction,attack);
-                    
-                    var dist = point_distance(x,y,x,y-6);
-                    var dir = image_angle+point_direction(x,y,x,y-6);
-                    shootBullet(x+lengthdir_x(dist,dir),y+lengthdir_y(dist,dir),20,direction,attack);
+            if (inViewRangeAny(chaseTarget,fovAngle,fovRange)) {
+                /* shoot when in range */
+                if (chaseTarget.object_index != obj_squad) {
+                    chaseTimer = 0;
+                    if (fire &gt; 0) {
+                        fire -= fireRate;
+                        var dist = point_distance(x,y,x,y+6);
+                        var dir = image_angle+point_direction(x,y,x,y+6);
+                        shootBullet(x+lengthdir_x(dist,dir),y+lengthdir_y(dist,dir),20,direction,attack);
+                        
+                        var dist = point_distance(x,y,x,y-6);
+                        var dir = image_angle+point_direction(x,y,x,y-6);
+                        shootBullet(x+lengthdir_x(dist,dir),y+lengthdir_y(dist,dir),20,direction,attack);
+                    }
+                }
+            }
+            turnRate = angle_difference(point_direction(x,y,chaseTarget.x,chaseTarget.y),direction);
+            if (isEngaged) {
+                if (distance_to_object(assignedSquad) &lt; assignedSquad.engageRange) {
+                    /* turn towards enemy */
+                    if (chaseTarget.object_index != obj_squad) {
+                        //turnRate *= 2;
+                        if (++chaseTimer &gt;= maxChaseTimer) {
+                            /* choose different target */
+                            chaseTarget = engagedSquad.squadMember[irandom(engagedSquad.squadSize-1)];
+                        }
+                    }
+                    else {
+                        /* enemy squad destroyed */
+                        engagedSquad = undefined;
+                        chaseTarget = assignedSquad;
+                        assignedSquad.isEngaged = false;
+                        isEngaged = false;
+                        chaseTimer = 0;
+                    }
+                }
+                else {
+                    //return to inital contact position
+                    chaseTarget = assignedSquad;
+                }
+            }
+            else {
+                // idling around requested location
+                if (distance_to_object(assignedSquad) &lt; assignedSquad.baseEngageRange) {
+                    if (irandom(200)) {idleSide *= -1;}
+                    turnRate = angle_difference(point_direction(x,y,chaseTarget.x,chaseTarget.y)+(90*idleSide),direction);
                 }
             }
         }
-        turnRate = angle_difference(point_direction(x,y,chaseTarget.x,chaseTarget.y),direction);
-        if (isEngaged) {
-            if (distance_to_object(assignedSquad) &lt; assignedSquad.engageRange) {
-                /* turn towards enemy */
-                if (chaseTarget.object_index != obj_squad) {
-                    //turnRate *= 2;
-                    if (++chaseTimer &gt;= maxChaseTimer) {
-                        /* choose different target */
-                        chaseTarget = engagedSquad.squadMember[irandom(engagedSquad.squadSize-1)];
-                    }
+        else {
+            /* target destroyed */
+            if (isEngaged) {
+                /* seeking different target */
+                if (instance_exists(engagedSquad)) {
+                    chaseTarget = engagedSquad.squadMember[irandom(engagedSquad.squadSize-1)];
                 }
                 else {
                     /* enemy squad destroyed */
@@ -130,52 +163,40 @@ if (chaseTarget != undefined) {
                     chaseTimer = 0;
                 }
             }
-            else {
-                //return to inital contact position
-                chaseTarget = assignedSquad;
-            }
         }
-        else {
-            // idling around requested location
-            if (distance_to_object(assignedSquad) &lt; assignedSquad.baseEngageRange) {
-                if (irandom(200)) {idleSide *= -1;}
-                turnRate = angle_difference(point_direction(x,y,chaseTarget.x,chaseTarget.y)+(90*idleSide),direction);
-            }
-        }
+    }
+    if (isEngaged) {
+        var maxTurnRate = 1.5;
+        //if (isEngaged) {minTurnRate = 1;}
+        turnRate = max(-maxTurnRate,min(maxTurnRate,turnRate/50));
     }
     else {
-        /* target destroyed */
-        if (isEngaged) {
-            /* seeking different target */
-            if (instance_exists(engagedSquad)) {
-                chaseTarget = engagedSquad.squadMember[irandom(engagedSquad.squadSize-1)];
-            }
-            else {
-                /* enemy squad destroyed */
-                engagedSquad = undefined;
-                chaseTarget = assignedSquad;
-                assignedSquad.isEngaged = false;
-                isEngaged = false;
-                chaseTimer = 0;
+        turnRate = sign(turnRate);
+    }
+    if (isEngaged) {moveSpeed = baseMoveSpeed;} else {moveSpeed = baseMoveSpeed*0.5;}
+    if (fire &lt;= 0) {fire++;}
+    image_index = clamp(-(turnRate*4)+15,0,image_number-1);
+    speed = var_wipe(speed,moveSpeed,200,0,0.1);
+    direction += turnRate*turnRateCof;
+    image_angle = direction
+}
+else {
+    if (takeOff) {
+        direction = takeOffFrom.direction;
+        speed = var_wipe(speed,5,100,0,0.01);
+        image_index = 15;
+        if (!place_meeting(x,y,takeOffFrom)) {
+            image_xscale = var_wipe(image_xscale,1,100,0.1,0);
+            image_yscale = var_wipe(image_yscale,1,100,0.1,0);
+            if ((image_xscale &gt;= 1) &amp;&amp; (image_yscale &gt;= 1)) {
+                image_xscale = 1;
+                image_yscale = 1;
+                takeOff = false;
             }
         }
     }
 }
-if (isEngaged) {
-    var maxTurnRate = 1.5;
-    //if (isEngaged) {minTurnRate = 1;}
-    turnRate = max(-maxTurnRate,min(maxTurnRate,turnRate/50));
-}
-else {
-    turnRate = sign(turnRate);
-}
-if (isEngaged) {moveSpeed = baseMoveSpeed;} else {moveSpeed = baseMoveSpeed*0.5;}
-if (fire &lt;= 0) {fire++;}
-image_index = clamp(-(turnRate*4)+15,0,image_number-1);
-speed = var_wipe(speed,moveSpeed,200,0,0.1);
-direction += turnRate*turnRateCof;
-image_angle = direction
-propellerIndex = (++propellerIndex) mod 4;
+    propellerIndex = (++propellerIndex) mod 4;
 if (!canMove) {speed = 0;}
 </string>
           </argument>
@@ -228,9 +249,9 @@ if (!canMove) {speed = 0;}
           <argument>
             <kind>1</kind>
             <string>draw_self();
-var dist = point_distance(x,y,x+7,y);
+var dist = point_distance(x,y,x+(7*image_xscale),y);
 var dir = image_angle+point_direction(x,y,x+7,y);
-draw_sprite_ext(spr_propeller,propellerIndex,x+lengthdir_x(dist,dir),y+lengthdir_y(dist,dir),1,1,image_angle,white,1);
+draw_sprite_ext(spr_propeller,propellerIndex,x+lengthdir_x(dist,dir),y+lengthdir_y(dist,dir),image_xscale,image_yscale,image_angle,white,1);
 </string>
           </argument>
         </arguments>

@@ -17,6 +17,9 @@
     <sprite>sprites\spr_propeller</sprite>
     <sprite>sprites\spr_engagement_arrow</sprite>
     <sprite>sprites\spr_squad_font</sprite>
+    <sprite>sprites\spr_runway</sprite>
+    <sprite>sprites\spr_take_off</sprite>
+    <sprite>sprites\spr_landing</sprite>
   </sprites>
   <backgrounds name="background">
     <background>background\background0</background>
@@ -29,9 +32,11 @@
     <script>scripts\inViewRange.gml</script>
     <script>scripts\inViewRangeAny.gml</script>
     <script>scripts\createSquad.gml</script>
+    <script>scripts\createPlane.gml</script>
     <script>scripts\shootBullet.gml</script>
     <script>scripts\fireParticleInit.gml</script>
     <script>scripts\explosionEffect.gml</script>
+    <script>scripts\assignEnemy.gml</script>
   </scripts>
   <objects name="objects">
     <object>objects\obj_plane_parent</object>
@@ -41,6 +46,7 @@
     <object>objects\obj_bullet</object>
     <object>objects\obj_control</object>
     <object>objects\obj_explosion_sharpnel</object>
+    <object>objects\obj_runway</object>
   </objects>
   <rooms name="rooms">
     <room>rooms\room0</room>

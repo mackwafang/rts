@@ -26,6 +26,8 @@
           <argument>
             <kind>1</kind>
             <string>isAlly = true;
+planesTakingOff = false;
+planesLanding = false;
 
 canMove = true;
 canEngage = true;
@@ -38,8 +40,8 @@ baseEngageRange = 128;
 engageRange = 128;
 engageSquad = undefined;
 isEngaged = false;
-dest_x = 0;
-dest_y = 0;
+dest_x = x;
+dest_y = y;
 ai_control = false;
 
 engagementArrowIndex = 0;
@@ -93,13 +95,15 @@ ds_list_destroy(coordinate_queue);
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if (!isEngaged) {
-    if (ds_list_size(coordinate_queue) &lt; 5*2) {
-        var xx = irandom(room_width);
-        var yy = irandom(room_height);
-        
-        ds_list_add(coordinate_queue,xx,yy);
-        print("added "+string(xx)+" "+string(yy));
+            <string>if (!planesTakingOff &amp;&amp; !planesLanding) {
+    if (!isEngaged) {
+        if (ds_list_size(coordinate_queue) &lt; 5*2) {
+            var xx = irandom(room_width);
+            var yy = irandom(room_height);
+            
+            ds_list_add(coordinate_queue,xx,yy);
+            print("added "+string(xx)+" "+string(yy));
+        }
     }
 }
 alarm[0] = 200;
@@ -140,13 +144,7 @@ if (canEngage) {
                 if (!isEngaged) {
                     isEngaged = true;
                     engageSquad = enemy;
-                    for (var j = 0; j &lt; squadSize; j++) {
-                        if (instance_exists(squadMember[j])) {
-                            squadMember[j].chaseTarget = enemy.squadMember[irandom(enemy.squadSize-1)];
-                            squadMember[j].isEngaged = true;
-                            squadMember[j].engagedSquad = enemy;
-                        }
-                    }
+                    assignEnemy(enemy);
                 }
                 else {
                     //enemy.x = var_wipe(enemy.x,x,100,0,1);
@@ -166,55 +164,56 @@ if (canEngage) {
         }
     }
 }
-if ((!isEngaged) &amp;&amp; (ai_control)) {
-    //x = var_wipe(x,dest_x,100,0,1);
-    //y = var_wipe(y,dest_y,100,0,1);
-    var angle = angle_difference(point_direction(x,y,dest_x,dest_y),direction);
-    direction += sign(angle)*2;
-    speed = var_wipe(speed,1.5,100,0,0.2);
-}
-/* change engagedment distance based on plane's location, if squad is in combat */
-if (isEngaged) {
-    var maxDist = 0;
-    for (var i = 0; i &lt; squadSize; i++) {
-        if (instance_exists(squadMember[i])) {
-            if (distance_to_object(squadMember[i]) &gt; maxDist) {
-                maxDist = distance_to_object(squadMember[i]);
+if (!planesTakingOff &amp;&amp; !planesLanding) {
+    if ((!isEngaged) &amp;&amp; (ai_control)) {
+        //x = var_wipe(x,dest_x,100,0,1);
+        //y = var_wipe(y,dest_y,100,0,1);
+        var angle = angle_difference(point_direction(x,y,dest_x,dest_y),direction);
+        direction += sign(angle)*2;
+        speed = var_wipe(speed,1.5,100,0,0.2);
+    }
+    /* change engagedment distance based on plane's location, if squad is in combat */
+    if (isEngaged) {
+        var maxDist = 0;
+        for (var i = 0; i &lt; squadSize; i++) {
+            if (instance_exists(squadMember[i])) {
+                if (distance_to_object(squadMember[i]) &gt; maxDist) {
+                    maxDist = distance_to_object(squadMember[i]);
+                }
             }
         }
+        engageRange = maxDist;
+        if (engageSquad == undefined) {
+            isEngaged = false;
+        }
     }
-    engageRange = maxDist;
-    if (engageSquad == undefined) {
-        isEngaged = false;
+    else {
+        engageRange = baseEngageRange;
     }
-}
-else {
-    engageRange = baseEngageRange;
-}
-if (ds_list_size(coordinate_queue) &gt;= 2) {
-    dest_x = ds_list_find_value(coordinate_queue,0);
-    dest_y = ds_list_find_value(coordinate_queue,1);
-}
-if (point_distance(x,y,dest_x,dest_y) &lt; 32) {
     if (ds_list_size(coordinate_queue) &gt;= 2) {
-        print("removed "+string(dest_x));
-        ds_list_delete(coordinate_queue,0);
-        ds_list_delete(coordinate_queue,0);
-        print("removed "+string(dest_y));
+        dest_x = ds_list_find_value(coordinate_queue,0);
+        dest_y = ds_list_find_value(coordinate_queue,1);
+    }
+    if (point_distance(x,y,dest_x,dest_y) &lt; 32) {
+        if (ds_list_size(coordinate_queue) &gt;= 2) {
+            print("removed "+string(dest_x));
+            ds_list_delete(coordinate_queue,0);
+            ds_list_delete(coordinate_queue,0);
+            print("removed "+string(dest_y));
+        }
+    }
+    /* destroy squad when all memeber is destroyed */
+    var membersDestroyed = 0;
+    for (var i = 0; i &lt; squadSize; i++) {
+        if (!instance_exists(squadMember[i])) {
+            membersDestroyed++;
+        }
+    }
+    membersAlive = squadSize-membersDestroyed;
+    if (membersDestroyed == squadSize) {
+        instance_destroy();
     }
 }
-/* destroy squad when all memeber is destroyed */
-var membersDestroyed = 0;
-for (var i = 0; i &lt; squadSize; i++) {
-    if (!instance_exists(squadMember[i])) {
-        membersDestroyed++;
-    }
-}
-membersAlive = squadSize-membersDestroyed;
-if (membersDestroyed == squadSize) {
-    instance_destroy();
-}
-
 if (!canMove) {
     speed = 0;
 }
@@ -286,6 +285,9 @@ if (isEngaged &amp;&amp; (engageSquad != undefined)) {
     }
 }
 draw_sprite_ext(spr_target,0,(x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,1,1,iconDirection,colour,1);
+if (planesTakingOff) {
+    draw_sprite_ext(spr_take_off,-1,(x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,1,1,0,colour,1);
+}
 draw_set_font(font);
 draw_set_valign(fa_center);
 draw_set_halign(fa_middle);
