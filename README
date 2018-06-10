@@ -1,8 +1,14 @@
 rts (name TBD) by mackwafang:
 
+ver 0.3.1.3:
+	- Added squad ammunition
+			+ 120 "ammo" per planes in squad
+			+ Each bullet fired from 1 plane reduce reserve by 1
+		
 ver 0.3.1:
 	- Changes to squad creation (temporary):
 		+ If takeoff point is specified, squad starts at takeoff point.
+	- Added planes landing on runway/carrier
 
 ver 0.3:
 	- Added planes taking off from a runway/carrier

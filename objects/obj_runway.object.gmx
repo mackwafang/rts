@@ -34,7 +34,7 @@ planesRequired = 0; //number of planes required to send out or take in
 squadQueue = ds_queue_create();
 useTime = 0; //takeoff/landing time
 sendPlaneToSquad = undefined;
-maxUseTime = 60;
+maxUseTime = 30;
 </string>
           </argument>
         </arguments>

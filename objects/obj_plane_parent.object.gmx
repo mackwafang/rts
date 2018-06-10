@@ -28,8 +28,9 @@
             <string>canMove = true;
 canShoot = true;
 isAlly = true;
-takeOff = false;
-landing = false;
+takeOff = false; // plane is attempting taking off
+landing = false; // plane is attempting to land
+isLandingInProgress = false; // plane is in process of landing
 takeOffFrom = noone;
 
 baseMoveSpeed = 4;
@@ -102,15 +103,32 @@ if ((!takeOff &amp;&amp; !landing)) {
                 /* shoot when in range */
                 if (chaseTarget.object_index != obj_squad) {
                     chaseTimer = 0;
-                    if (fire &gt; 0) {
-                        fire -= fireRate;
-                        var dist = point_distance(x,y,x,y+6);
-                        var dir = image_angle+point_direction(x,y,x,y+6);
-                        shootBullet(x+lengthdir_x(dist,dir),y+lengthdir_y(dist,dir),20,direction,attack);
-                        
-                        var dist = point_distance(x,y,x,y-6);
-                        var dir = image_angle+point_direction(x,y,x,y-6);
-                        shootBullet(x+lengthdir_x(dist,dir),y+lengthdir_y(dist,dir),20,direction,attack);
+                    if (assignedSquad.ammo &gt; 0) {
+                        if (fire &gt; 0) {
+                            fire -= fireRate;
+                            assignedSquad.ammo -= 2;
+                            var dist = point_distance(x,y,x,y+6);
+                            var dir = image_angle+point_direction(x,y,x,y+6);
+                            shootBullet(x+lengthdir_x(dist,dir),y+lengthdir_y(dist,dir),20,direction,attack);
+                            
+                            var dist = point_distance(x,y,x,y-6);
+                            var dir = image_angle+point_direction(x,y,x,y-6);
+                            shootBullet(x+lengthdir_x(dist,dir),y+lengthdir_y(dist,dir),20,direction,attack);
+                        }
+                    }
+                    else {
+                        /* no ammunition left, cannot engage */
+                        print(string(id)+" returning");
+                        ds_list_clear(assignedSquad.coordinate_queue);
+                        engagedSquad = undefined;
+                        chaseTarget = assignedSquad;
+                        isEngaged = false;
+                        chaseTimer = 0;
+                        assignedSquad.canEngage = false;
+                        assignedSquad.isEngaged = false;
+                        assignedSquad.planesLanding = true;
+                        assignedSquad.dest_x = takeOffFrom.x+lengthdir_x(-256,takeOffFrom.direction);
+                        assignedSquad.dest_y = takeOffFrom.y+lengthdir_y(-256,takeOffFrom.direction);
                     }
                 }
             }
@@ -194,8 +212,34 @@ else {
             }
         }
     }
+    if (landing) {
+        var angle = angle_difference(point_direction(x,y,assignedSquad.x,assignedSquad.y),direction)/50;
+        if (distance_to_object(takeOffFrom) &lt;= 256) {
+            if (!inViewRangeAny(self,160,256,takeOffFrom)) {
+                angle = angle_difference(point_direction(x,y,takeOffFrom.x,takeOffFrom.y),direction)/25;
+                isLandingInProgress = true;
+            }
+        }
+        if (isLandingInProgress) {
+            if (place_meeting(x,y,takeOffFrom)) {
+                isLandingInProgress = true;
+                angle = 0;
+                speed = var_wipe(speed,0,100,0,0.02);
+                image_xscale = var_wipe(image_xscale,0.5,100,0.1,0);
+                image_yscale = var_wipe(image_yscale,0.5,100,0.1,0);
+                if ((image_xscale &lt;= 0.5) &amp;&amp; (image_yscale &lt;= 0.5)) {
+                    image_xscale = 1;
+                    image_yscale = 1;
+                }
+                if (speed == 0) {
+                    instance_destroy();
+                }
+            }
+        }
+        direction += angle;
+    }
 }
-image_angle = direction
+image_angle = direction;
 propellerIndex = (++propellerIndex) mod 4;
 if (!canMove) {speed = 0;}
 </string>

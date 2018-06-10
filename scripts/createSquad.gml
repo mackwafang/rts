@@ -24,6 +24,9 @@ for (var i = 0; i < squadSize; i++) {
 }
 s.isAlly = isAlly;
 s.ai_control = aiControl;
+s.takeOffFrom = takeOffFrom;
+s.maxAmmo = 120*squadSize;
+s.ammo = s.maxAmmo;
 
 if (takeOffFrom == noone) {
     for (var i = 0; i < squadSize; i++) {
