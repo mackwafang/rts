@@ -22,6 +22,7 @@
     <sprite>sprites\spr_squad_font</sprite>
     <sprite>sprites\spr_runway</sprite>
     <sprite>sprites\spr_ammo</sprite>
+    <sprite>sprites\spr_squad_outline_gui</sprite>
   </sprites>
   <backgrounds name="background">
     <background>background\background0</background>
@@ -39,6 +40,8 @@
     <script>scripts\fireParticleInit.gml</script>
     <script>scripts\explosionEffect.gml</script>
     <script>scripts\assignEnemy.gml</script>
+    <script>scripts\availableSquad.gml</script>
+    <script>scripts\landSquad.gml</script>
   </scripts>
   <objects name="objects">
     <object>objects\obj_plane_parent</object>
@@ -53,7 +56,10 @@
   <rooms name="rooms">
     <room>rooms\room0</room>
   </rooms>
-  <constants number="10">
+  <constants number="13">
+    <constant name="MAX_SQUADS">9</constant>
+    <constant name="maxView">1600</constant>
+    <constant name="minView">256</constant>
     <constant name="windowRatio_x">view_hport[0]/view_hview[0]</constant>
     <constant name="windowRatio_y">view_wport[0]/view_wview[0]</constant>
     <constant name="yellow">c_yellow</constant>

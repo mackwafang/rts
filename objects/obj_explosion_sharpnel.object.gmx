@@ -33,9 +33,9 @@ part_type_size(smokeType,0,0,0.2,0);
 part_type_alpha2(smokeType,1,0);
 part_type_color1(smokeType,0);
 part_type_orientation(smokeType,0,360,0,0,0);
-part_type_life(smokeType,30,30);
+part_type_life(smokeType,45,45);
 
-alarm[0] = 60;
+alarm[0] = 90;
 </string>
           </argument>
         </arguments>
@@ -52,7 +52,7 @@ alarm[0] = 60;
         <exetype>2</exetype>
         <functionname></functionname>
         <codestring></codestring>
-        <whoName>self</whoName>
+        <whoName>other</whoName>
         <relative>0</relative>
         <isnot>0</isnot>
         <arguments>
@@ -77,13 +77,13 @@ instance_destroy();
         <exetype>2</exetype>
         <functionname></functionname>
         <codestring></codestring>
-        <whoName>self</whoName>
+        <whoName>other</whoName>
         <relative>0</relative>
         <isnot>0</isnot>
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if (alarm[0] &gt; 30) {part_particles_create(smokeSystem,x,y,smokeType,1);}
+            <string>if (alarm[0] &gt; 45) {part_particles_create(smokeSystem,x,y,smokeType,1);}
 </string>
           </argument>
         </arguments>

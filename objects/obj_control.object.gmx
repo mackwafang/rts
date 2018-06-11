@@ -27,6 +27,12 @@
             <kind>1</kind>
             <string>fireParticleInit();
 global.mapView = false;
+
+for (var i = 0; i &lt;= MAX_SQUADS; i++) {
+    global.squad[i] = noone;
+}
+global.squadsInCommand = 6;
+global.selectedSquad = -1;
 </string>
           </argument>
         </arguments>
@@ -49,31 +55,48 @@ global.mapView = false;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if (mouse_check_button_pressed(mb_left)) {
-    createSquad(mouse_x,mouse_y,instance_number(obj_squad),5,obj_ally_plane,true,100001,true);
+            <string>/* set selected squad */
+var key = keyboard_key;
+if ((49 &lt;= key) || (key &lt;= 57)) {
+    if (keyboard_check_pressed(key)) {
+            global.selectedSquad = key-49;
+    }
+}
+/* squad command */
+if (global.selectedSquad &gt;= 0) {
+    if (mouse_check_button_pressed(mb_left)) {
+        var s = availableSquad();
+        if (s != -1) {
+            createSquad(mouse_x,mouse_y,global.selectedSquad,10,obj_ally_plane,true,100001);
+        }
+    }
 }
 if (mouse_check_button_pressed(mb_right)) {
-    createSquad(mouse_x,mouse_y,instance_number(obj_squad),5,obj_enemy_plane,false,100002,true);
+    createSquad(mouse_x,mouse_y,instance_number(obj_squad),10,obj_enemy_plane,false,100002,true);
 }
 /* view scaling */
+var prev_w = view_wview[0];
+var prev_h = view_hview[0];
 if (mouse_wheel_up()) {
-    view_wview[0] -= 10;
-    view_hview[0] -= 10;
+    view_wview[0] -= maxView*0.05;
+    view_hview[0] -= maxView*0.05;
 }
 if (mouse_wheel_down()) {
-    view_wview[0] += 10;
-    view_hview[0] += 10;
+    view_wview[0] += maxView*0.05;
+    view_hview[0] += maxView*0.05;
 }
-if (keyboard_check(vk_left)) {view_xview[0] -= 5;}
-if (keyboard_check(vk_right)) {view_xview[0] += 5;}
-if (keyboard_check(vk_up)) {view_yview[0] -= 5;}
-if (keyboard_check(vk_down)) {view_yview[0] += 5;}
+view_wview[0] = clamp(view_wview[0],minView,maxView);
+view_hview[0] = clamp(view_hview[0],minView,maxView);
+view_xview[0] += (prev_w-view_wview[0])/2;
+view_yview[0] += (prev_h-view_hview[0])/2;
+if (keyboard_check(ord("A"))) {view_xview[0] -= 5;}
+if (keyboard_check(ord("D"))) {view_xview[0] += 5;}
+if (keyboard_check(ord("W"))) {view_yview[0] -= 5;}
+if (keyboard_check(ord("S"))) {view_yview[0] += 5;}
 if (keyboard_check_pressed(vk_space)) {
     view_wview[0] = 960;
     view_hview[0] = 960;
 }
-view_wview[0] = clamp(view_wview[0],512,1280);
-view_hview[0] = clamp(view_hview[0],512,1280);
 </string>
           </argument>
         </arguments>
@@ -96,9 +119,50 @@ view_hview[0] = clamp(view_hview[0],512,1280);
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>draw_set_valign(fa_top);
+            <string>var wv = view_wport[0];
+var hv = view_hport[0];
+
+draw_set_valign(fa_top);
 draw_set_halign(fa_left);
 draw_text(0,0,string(mouse_x)+","+string(mouse_y));
+
+for (var i = 0; i &lt; global.squadsInCommand; i++) {
+    var s = global.squad[i];
+    var align = global.squadsInCommand mod 2;
+    var spacing = 6;
+    var w = 40+spacing;
+    var h = 40+spacing;
+    var xx = (wv/2)+(w*i)+((align+1)*(w/2))-(align*(w/2))-((global.squadsInCommand*w)/2);
+    var yy = (hv-(h/2));
+    var selected = 0;
+    if (global.selectedSquad == i) {
+        selected = 1;
+    }
+    draw_sprite_ext(spr_squad_outline_gui,selected,xx,yy,1,1,0,green,1);
+    if (s != noone) {
+        draw_sprite(spr_ammo,0,xx-((w-spacing)/2),yy-3-(h/2));
+        draw_sprite_part_ext(spr_ammo,1,0,0,(ceil(s.ammo/round(s.maxAmmo/8)))*5,6,xx-((w-spacing)/2),yy-3-(h/2),1,1,green,1);
+        draw_set_valign(fa_bottom);
+        draw_set_halign(fa_center);
+        
+        draw_set_colour(green);
+        draw_text(xx,yy-6-(h/2),string(s.membersAlive)+"/"+string(s.squadSize));
+        draw_set_colour(white);
+        
+        if (s != noone) {
+            if (s.planesTakingOff) {
+                draw_sprite_ext(spr_take_off,-1,xx,yy,2,2,0,green,1);
+            }
+            else if (s.planesLanding) {
+                draw_sprite_ext(spr_landing,-1,xx,yy,2,2,0,green,1);
+            }
+            else {
+                draw_sprite_ext(spr_target,0,xx,yy,2,2,0,green,1);
+            }
+        }
+    }
+}
+//draw_line(wv/2,0,wv/2,hv);
 </string>
           </argument>
         </arguments>

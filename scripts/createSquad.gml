@@ -14,8 +14,10 @@ if (argument_count >= 8) {
     aiControl = argument[7];
 }
 
-
 var s = instance_create(xx,yy,obj_squad);
+if (isAlly) {
+    global.squad[squadNumber] = s;
+}
 s.squadNumber = squadNumber;
 s.planeType = planeType;
 s.squadSize = squadSize;
@@ -25,7 +27,7 @@ for (var i = 0; i < squadSize; i++) {
 s.isAlly = isAlly;
 s.ai_control = aiControl;
 s.takeOffFrom = takeOffFrom;
-s.maxAmmo = 120*squadSize;
+s.maxAmmo = 40*squadSize;
 s.ammo = s.maxAmmo;
 
 if (takeOffFrom == noone) {

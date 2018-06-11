@@ -31,6 +31,7 @@ planesLanding = false;
 
 canMove = true;
 canEngage = true;
+selected = false; //is squad selected by the user
 
 squadNumber = -1;
 squadSize = 6;
@@ -38,8 +39,8 @@ maxAmmo = 150*squadSize;
 ammo = maxAmmo;
 membersAlive = 6;
 planeType = noone;
-baseEngageRange = 128;
-engageRange = 128;
+baseEngageRange = 256;
+engageRange = 256;
 engageSquad = undefined;
 takeOffFrom = undefined;
 isEngaged = false;
@@ -75,6 +76,7 @@ alarm[0] = 1;
           <argument>
             <kind>1</kind>
             <string>font_delete(font);
+global.squad[squadNumber] = noone;
 ds_list_destroy(coordinate_queue);
 </string>
           </argument>
@@ -141,31 +143,29 @@ alarm[0] = 200;
         engageSquad = undefined;
     }
 }
-if ((!planesTakingOff) &amp;&amp; (!planesLanding)) {
-    if (canEngage) {
-        /* engage enemy */
-        for (var i = 0; i &lt; instance_number(obj_squad); i++) {
-            var enemy = instance_find(obj_squad,i);
-            if (engageRange+enemy.engageRange &gt;= distance_to_object(enemy)) {
-                if (isAlly != enemy.isAlly) {
-                    alarm[0] = 300;
-                    if (!isEngaged) {
-                        isEngaged = true;
-                        engageSquad = enemy;
-                        assignEnemy(enemy);
-                    }
-                    else {
-                        //enemy.x = var_wipe(enemy.x,x,100,0,1);
-                        //enemy.y = var_wipe(enemy.y,y,100,0,1);
-                        if (engageSquad != undefined) {
-                            direction += sign(angle_difference(point_direction(x,y,engageSquad.x,engageSquad.y),direction));
-                            if (distance_to_object(engageSquad) &gt; 64) {
-                                speed = var_wipe(speed,1,100,0,0.5);
-                                //print(string(id)+" moving towards "+string(engageSquad));
-                            }
-                            else {
-                                speed = 0;
-                            }
+if (canEngage) {
+    /* engage enemy */
+    for (var i = 0; i &lt; instance_number(obj_squad); i++) {
+        var enemy = instance_find(obj_squad,i);
+        if (engageRange+enemy.engageRange &gt;= distance_to_object(enemy)) {
+            if (isAlly != enemy.isAlly) {
+                alarm[0] = 300;
+                if (!isEngaged) {
+                    isEngaged = true;
+                    engageSquad = enemy;
+                    assignEnemy(enemy);
+                }
+                else {
+                    //enemy.x = var_wipe(enemy.x,x,100,0,1);
+                    //enemy.y = var_wipe(enemy.y,y,100,0,1);
+                    if (engageSquad != undefined) {
+                        direction += sign(angle_difference(point_direction(x,y,engageSquad.x,engageSquad.y),direction));
+                        if (distance_to_object(engageSquad) &gt; 64) {
+                            speed = var_wipe(speed,1,100,0,0.5);
+                            //print(string(id)+" moving towards "+string(engageSquad));
+                        }
+                        else {
+                            speed = 0;
                         }
                     }
                 }
@@ -181,7 +181,7 @@ for (var i = 0; i &lt; squadSize; i++) {
 }
 membersAlive = squadSize-membersDestroyed;
 if (!planesTakingOff) {
-    if ((!isEngaged) &amp;&amp; (ai_control)) {
+    if (!isEngaged) {
         /* moving towards destination*/
         var angle = angle_difference(point_direction(x,y,dest_x,dest_y),direction);
         direction += sign(angle)*2;
@@ -218,8 +218,7 @@ if (!planesTakingOff) {
                     squadMember[i].landing = true;
                 }
             }
-            dest_x = takeOffFrom.x+lengthdir_x(-256,takeOffFrom.direction);
-            dest_y = takeOffFrom.y+lengthdir_y(-256,takeOffFrom.direction);
+            landSquad();
         }
         if (ds_list_size(coordinate_queue) &gt;= 2) {
             /* destination reached, removed current destination*/
@@ -230,6 +229,20 @@ if (!planesTakingOff) {
     /* destroy squad when all memeber is destroyed */
     if (membersDestroyed == squadSize) {
         instance_destroy();
+    }
+}
+if (global.selectedSquad == squadNumber) {selected = true;} else {selected = false;}
+/* placing waypoints */
+if (!ai_control) {
+    if (selected) {
+        if (mouse_check_button_pressed(mb_left)) {
+            dest_x = mouse_x;
+            dest_y = mouse_y;
+            planesLanding = false;
+        }
+        if (keyboard_check_pressed(ord("F"))) {
+            landSquad();
+        }
     }
 }
 if (!canMove) {
@@ -303,8 +316,8 @@ if (isEngaged &amp;&amp; (engageSquad != undefined)) {
     }
 }
 draw_sprite_ext(spr_target_icon,0,(x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,1,1,0,colour,1);
-draw_sprite(spr_ammo,0,((x-20)-view_xview[0])*windowRatio_x,((y+12)-view_yview[0])*windowRatio_y);
-draw_sprite_part_ext(spr_ammo,1,0,0,(ammo div round(maxAmmo/8))*5,6,((x-20)-view_xview[0])*windowRatio_x,((y+12)-view_yview[0])*windowRatio_y,1,1,colour,1);
+draw_sprite(spr_ammo,0,((x-view_xview[0])*windowRatio_x)-20,((y-view_yview[0])*windowRatio_y)+12);
+draw_sprite_part_ext(spr_ammo,1,0,0,(ceil(ammo/round(maxAmmo/8)))*5,6,((x-view_xview[0])*windowRatio_x)-20,((y-view_yview[0])*windowRatio_y)+12,1,1,colour,1);
 if (planesTakingOff) {
     draw_sprite_ext(spr_take_off,-1,(x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,1,1,0,colour,1);
 }
@@ -323,7 +336,8 @@ for (var i = 0; i &lt; squadSize; i++) {
         hp += squadMember[i].hp;
     }
 }
-draw_text_colour(((x-view_xview[0])*windowRatio_x),(((y-12)-view_yview[0])*windowRatio_y),string(membersAlive)+"/"+string(squadSize),colour,colour,colour,colour,1);
+//draw_text_colour((x-view_xview[0])*windowRatio_x,((y-12)-view_yview[0])*windowRatio_y,string(membersAlive)+"/"+string(squadSize),colour,colour,colour,colour,1);
+draw_text_colour((x-view_xview[0])*windowRatio_x,((y-view_yview[0])*windowRatio_y)-12,string(membersAlive)+"/"+string(squadSize),colour,colour,colour,colour,1);
 //draw_circle_colour(x,y,engageRange,colour,colour,true);
 //draw_text_colour(x,y-10,string(membersAlive)+"/"+string(squadSize),colour,colour,colour,colour,1);
 </string>

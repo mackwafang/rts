@@ -50,7 +50,7 @@ chaseTimer = 0;
 maxChaseTimer = 3*60;
 
 fovRange = 256;
-fovAngle = 20;
+fovAngle = 10;
 idleSide = 1; //the side to go when plane is idling
 
 propellerIndex = 0;
@@ -134,7 +134,7 @@ if ((!takeOff &amp;&amp; !landing)) {
             }
             turnRate = angle_difference(point_direction(x,y,chaseTarget.x,chaseTarget.y),direction);
             if (isEngaged) {
-                if (distance_to_object(assignedSquad) &lt; assignedSquad.engageRange) {
+                if (distance_to_object(assignedSquad) &lt; assignedSquad.baseEngageRange) {
                     /* turn towards enemy */
                     if (chaseTarget.object_index != obj_squad) {
                         //turnRate *= 2;
@@ -213,17 +213,17 @@ else {
         }
     }
     if (landing) {
-        var angle = angle_difference(point_direction(x,y,assignedSquad.x,assignedSquad.y),direction)/50;
-        if (distance_to_object(takeOffFrom) &lt;= 256) {
-            if (!inViewRangeAny(self,160,256,takeOffFrom)) {
-                angle = angle_difference(point_direction(x,y,takeOffFrom.x,takeOffFrom.y),direction)/25;
+        //var angle = angle_difference(point_direction(x,y,assignedSquad.x,assignedSquad.y),direction)/40;
+        var angle = angle_difference(point_direction(x,y,takeOffFrom.x,takeOffFrom.y),direction)/20;
+        /*if (distance_to_object(takeOffFrom) &lt;= 512) {
+            if (!inViewRangeAny(self,170,512,takeOffFrom)) {
+                angle = angle_difference(point_direction(x,y,takeOffFrom.x,takeOffFrom.y),direction)/20;
                 isLandingInProgress = true;
             }
-        }
-        if (isLandingInProgress) {
+        }*/
+        if (true) {
             if (place_meeting(x,y,takeOffFrom)) {
-                isLandingInProgress = true;
-                angle = 0;
+                angle = angle_difference(takeOffFrom.direction,direction)/20;
                 speed = var_wipe(speed,0,100,0,0.02);
                 image_xscale = var_wipe(image_xscale,0.5,100,0.1,0);
                 image_yscale = var_wipe(image_yscale,0.5,100,0.1,0);

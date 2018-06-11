@@ -12,8 +12,8 @@ if (argument_count == 4) {
     from = argument[3];
 }
 if ((instance_number(target) > 0) && instance_exists(from)) {
-    for (var i = 0; i < instance_number(target); i++) {
-        var o = instance_find(target,i);
+    for (var i = 0; i < instance_number(target.object_index); i++) {
+        var o = instance_find(target.object_index,i);
         if (point_distance(o.x,o.y,from.x,from.y) <= range) {
             /* Vector from to o */
             var x1 = o.x-from.x;
