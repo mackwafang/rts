@@ -76,7 +76,9 @@ alarm[0] = 1;
           <argument>
             <kind>1</kind>
             <string>font_delete(font);
-global.squad[squadNumber] = noone;
+if (isAlly) {
+    global.squad[squadNumber] = noone;
+}
 ds_list_destroy(coordinate_queue);
 </string>
           </argument>
@@ -109,7 +111,6 @@ ds_list_destroy(coordinate_queue);
                     var yy = irandom(room_height);
                     
                     ds_list_add(coordinate_queue,xx,yy);
-                    print("added "+string(xx)+" "+string(yy));
                 }
             }
         }
@@ -183,8 +184,14 @@ membersAlive = squadSize-membersDestroyed;
 if (!planesTakingOff) {
     if (!isEngaged) {
         /* moving towards destination*/
-        var angle = angle_difference(point_direction(x,y,dest_x,dest_y),direction);
-        direction += sign(angle)*2;
+        if (point_distance(x,y,dest_x,dest_y) &gt; 32) {
+            var angle = angle_difference(point_direction(x,y,dest_x,dest_y),direction);
+            direction += sign(angle)*2;
+            speed = var_wipe(speed,1.5,100,0,0.2);
+        }
+        else {
+            direction += 4;
+        }
         speed = var_wipe(speed,1.5,100,0,0.2);
     }
     /* change engagedment distance based on plane's location, if squad is in combat */
@@ -205,8 +212,8 @@ if (!planesTakingOff) {
     else {
         engageRange = baseEngageRange;
     }
+    /* get next location */
     if (ds_list_size(coordinate_queue) &gt;= 2) {
-        /* get next location */
         dest_x = ds_list_find_value(coordinate_queue,0);
         dest_y = ds_list_find_value(coordinate_queue,1);
     }
@@ -219,6 +226,8 @@ if (!planesTakingOff) {
                 }
             }
             landSquad();
+            x = dest_x;
+            y = dest_y;
         }
         if (ds_list_size(coordinate_queue) &gt;= 2) {
             /* destination reached, removed current destination*/
@@ -236,11 +245,18 @@ if (global.selectedSquad == squadNumber) {selected = true;} else {selected = fal
 if (!ai_control) {
     if (selected) {
         if (mouse_check_button_pressed(mb_left)) {
-            dest_x = mouse_x;
-            dest_y = mouse_y;
+            if (keyboard_check(vk_shift)) {
+                ds_list_add(coordinate_queue,mouse_x,mouse_y);
+            }
+            else {
+                dest_x = mouse_x;
+                dest_y = mouse_y;
+                ds_list_clear(coordinate_queue);
+            }
             planesLanding = false;
         }
         if (keyboard_check_pressed(ord("F"))) {
+            print("landing");
             landSquad();
         }
     }

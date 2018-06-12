@@ -1,5 +1,12 @@
 rts (name TBD) by mackwafang:
 
+ver 0.3.2.1:
+	- Fixed spawning multiple squad while squad is active
+	- Decreased take off time of squads
+	- Decreased landing time of squads
+	- Decreased planes idling range to a quarter
+	- Partially implemented manual waypoint queue
+
 ver 0.3.2:
 	- Added squad interface
 	- Added manual squad waypoint selection

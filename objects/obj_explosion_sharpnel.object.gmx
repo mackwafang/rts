@@ -29,13 +29,13 @@
 smokeType = part_type_create();
 
 part_type_sprite(smokeType,spr_particle,false,false,false);
-part_type_size(smokeType,0,0,0.2,0);
+part_type_size(smokeType,0,0,0.1,0);
 part_type_alpha2(smokeType,1,0);
 part_type_color1(smokeType,0);
 part_type_orientation(smokeType,0,360,0,0,0);
-part_type_life(smokeType,45,45);
+part_type_life(smokeType,100,100);
 
-alarm[0] = 90;
+alarm[0] = 120;
 </string>
           </argument>
         </arguments>
@@ -83,7 +83,7 @@ instance_destroy();
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if (alarm[0] &gt; 45) {part_particles_create(smokeSystem,x,y,smokeType,1);}
+            <string>if (alarm[0] &gt; 100) {part_particles_create(smokeSystem,x,y,smokeType,1);}
 </string>
           </argument>
         </arguments>

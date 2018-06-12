@@ -159,7 +159,7 @@ if ((!takeOff &amp;&amp; !landing)) {
             }
             else {
                 // idling around requested location
-                if (distance_to_object(assignedSquad) &lt; assignedSquad.baseEngageRange) {
+                if (distance_to_object(assignedSquad) &lt; assignedSquad.baseEngageRange/4) {
                     if (irandom(200)) {idleSide *= -1;}
                     turnRate = angle_difference(point_direction(x,y,chaseTarget.x,chaseTarget.y)+(90*idleSide),direction);
                 }
@@ -213,15 +213,9 @@ else {
         }
     }
     if (landing) {
-        //var angle = angle_difference(point_direction(x,y,assignedSquad.x,assignedSquad.y),direction)/40;
-        var angle = angle_difference(point_direction(x,y,takeOffFrom.x,takeOffFrom.y),direction)/20;
-        /*if (distance_to_object(takeOffFrom) &lt;= 512) {
-            if (!inViewRangeAny(self,170,512,takeOffFrom)) {
-                angle = angle_difference(point_direction(x,y,takeOffFrom.x,takeOffFrom.y),direction)/20;
-                isLandingInProgress = true;
-            }
-        }*/
-        if (true) {
+        var angle = angle_difference(point_direction(x,y,assignedSquad.x,assignedSquad.y),direction)/40;
+        if (isLandingInProgress) {
+            angle = angle_difference(point_direction(x,y,takeOffFrom.x,takeOffFrom.y),direction)/20;
             if (place_meeting(x,y,takeOffFrom)) {
                 angle = angle_difference(takeOffFrom.direction,direction)/20;
                 speed = var_wipe(speed,0,100,0,0.02);
@@ -234,6 +228,15 @@ else {
                 if (speed == 0) {
                     instance_destroy();
                 }
+            }
+            else {
+                speed = var_wipe(speed,moveSpeed*0.7,100,0,0.01);
+            }
+        }
+        else {
+            if (distance_to_object(assignedSquad) &lt; 48) {
+                angle = angle_difference(point_direction(x,y,takeOffFrom.x,takeOffFrom.y),direction)/20;
+                isLandingInProgress = true;
             }
         }
         direction += angle;
