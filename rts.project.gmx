@@ -23,6 +23,8 @@
     <sprite>sprites\spr_runway</sprite>
     <sprite>sprites\spr_ammo</sprite>
     <sprite>sprites\spr_squad_outline_gui</sprite>
+    <sprite>sprites\spr_engaging</sprite>
+    <sprite>sprites\spr_squad_number</sprite>
   </sprites>
   <backgrounds name="background">
     <background>background\background0</background>
@@ -42,6 +44,8 @@
     <script>scripts\assignEnemy.gml</script>
     <script>scripts\availableSquad.gml</script>
     <script>scripts\landSquad.gml</script>
+    <script>scripts\getSquadSelected.gml</script>
+    <script>scripts\turnary.gml</script>
   </scripts>
   <objects name="objects">
     <object>objects\obj_plane_parent</object>

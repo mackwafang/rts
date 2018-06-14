@@ -101,7 +101,6 @@ if (takeOff) {
             useTime = maxUseTime;
         }
         else {
-            /* no planes left to send, check for squad in queue */
             if (sendPlaneToSquad != undefined) {
                 if (instance_exists(sendPlaneToSquad)) {
                     sendPlaneToSquad.planesTakingOff = false;
@@ -112,9 +111,11 @@ if (takeOff) {
                 sendPlaneToSquad = ds_queue_dequeue(squadQueue);
                 planeType = sendPlaneToSquad.planeType;
                 planesRequired = sendPlaneToSquad.squadSize;
+                sendPlaneToSquad.visible = true;
             }
             else {
                 takeOff = false; //runway is now free
+                sendPlaneToSquad = undefined;
             }
         }
     }

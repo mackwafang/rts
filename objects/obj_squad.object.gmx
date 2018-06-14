@@ -47,6 +47,7 @@ isEngaged = false;
 dest_x = x;
 dest_y = y;
 ai_control = false;
+queueNewCoordinate = false;
 
 engagementArrowIndex = 0;
 coordinate_queue = ds_list_create();
@@ -104,7 +105,7 @@ ds_list_destroy(coordinate_queue);
             <kind>1</kind>
             <string>if (ai_control) {
     if (ammo &gt; 0) {
-        if (!planesTakingOff &amp;&amp; !planesLanding) {
+//        if (!planesTakingOff &amp;&amp; !planesLanding) {
             if (!isEngaged) {
                 if (ds_list_size(coordinate_queue) &lt; 5*2) {
                     var xx = irandom(room_width);
@@ -114,9 +115,9 @@ ds_list_destroy(coordinate_queue);
                 }
             }
         }
-    }
+//    }
 }
-alarm[0] = 200;
+alarm[0] = 100;
 </string>
           </argument>
         </arguments>
@@ -182,18 +183,7 @@ for (var i = 0; i &lt; squadSize; i++) {
 }
 membersAlive = squadSize-membersDestroyed;
 if (!planesTakingOff) {
-    if (!isEngaged) {
-        /* moving towards destination*/
-        if (point_distance(x,y,dest_x,dest_y) &gt; 32) {
-            var angle = angle_difference(point_direction(x,y,dest_x,dest_y),direction);
-            direction += sign(angle)*2;
-            speed = var_wipe(speed,1.5,100,0,0.2);
-        }
-        else {
-            direction += 4;
-        }
-        speed = var_wipe(speed,1.5,100,0,0.2);
-    }
+    var distToDest = point_distance(x,y,dest_x,dest_y);
     /* change engagedment distance based on plane's location, if squad is in combat */
     if (isEngaged) {
         var maxDist = 0;
@@ -210,14 +200,32 @@ if (!planesTakingOff) {
         }
     }
     else {
+        /* squad is not engaging */
         engageRange = baseEngageRange;
+        var angle = 0;
+        /* moving towards destination*/
+        if (distToDest &lt; 96) {
+            /* squad idling */
+            if (!planesLanding) {
+                angle = angle_difference(point_direction(x,y,dest_x,dest_y),direction);
+                if (ds_list_size(coordinate_queue) &lt; 2) {
+                    angle = angle_difference(point_direction(x,y,dest_x,dest_y)+90,direction);
+                }
+                speed = var_wipe(speed,1,100,0,0.2);
+            }
+            else {
+                angle = angle_difference(point_direction(x,y,dest_x,dest_y),direction);
+                speed = var_wipe(speed,0.75,100,0,0.2);
+            }
+        }
+        else {
+            /* squad moving towards waypoint */
+            angle = angle_difference(point_direction(x,y,dest_x,dest_y),direction)*2;
+            speed = var_wipe(speed,1.5,100,0,0.2);
+        }
     }
-    /* get next location */
-    if (ds_list_size(coordinate_queue) &gt;= 2) {
-        dest_x = ds_list_find_value(coordinate_queue,0);
-        dest_y = ds_list_find_value(coordinate_queue,1);
-    }
-    if (point_distance(x,y,dest_x,dest_y) &lt; 32) {
+    direction += sign(angle);
+    if (distToDest &lt; 64) {
         if (planesLanding) {
             /* for planes to land */
             for (var i = 0; i &lt; squadSize; i++) {
@@ -226,13 +234,17 @@ if (!planesTakingOff) {
                 }
             }
             landSquad();
-            x = dest_x;
-            y = dest_y;
+            dest_x = takeOffFrom.x;
+            dest_y = takeOffFrom.y;
         }
-        if (ds_list_size(coordinate_queue) &gt;= 2) {
-            /* destination reached, removed current destination*/
-            ds_list_delete(coordinate_queue,0);
-            ds_list_delete(coordinate_queue,0);
+        if (distToDest &lt; 32) {
+            if (ds_list_size(coordinate_queue) &gt;= 2) {
+                dest_x = ds_list_find_value(coordinate_queue,0);
+                dest_y = ds_list_find_value(coordinate_queue,1);
+                /* destination reached, removed current destination*/
+                ds_list_delete(coordinate_queue,0);
+                ds_list_delete(coordinate_queue,0);
+            }
         }
     }
     /* destroy squad when all memeber is destroyed */
@@ -240,12 +252,13 @@ if (!planesTakingOff) {
         instance_destroy();
     }
 }
-if (global.selectedSquad == squadNumber) {selected = true;} else {selected = false;}
+if (getSquadSelected(squadNumber)) {selected = true;} else {selected = false;}
 /* placing waypoints */
 if (!ai_control) {
     if (selected) {
+        queueNewCoordinate = keyboard_check(vk_shift);
         if (mouse_check_button_pressed(mb_left)) {
-            if (keyboard_check(vk_shift)) {
+            if (queueNewCoordinate) {
                 ds_list_add(coordinate_queue,mouse_x,mouse_y);
             }
             else {
@@ -290,37 +303,48 @@ if (!canMove) {
 if (!isAlly) {colour = red;}
 engagementArrowIndex = (++engagementArrowIndex) mod 32;
 var dir = 0;
-if (isEngaged) {
-    if (engageSquad != undefined) {
-        if (instance_exists(engageSquad)) {
-            var dist = point_distance((x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,(engageSquad.x-view_xview[0])*windowRatio_x,(engageSquad.y-view_yview[0])*windowRatio_y);
-            if (engageSquad.engageSquad == id) {dist /= 2;}
-            for (var i = dist; i &gt;= 8; i-= 8) {
-                dir = point_direction((x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,(engageSquad.x-view_xview[0])*windowRatio_x,(engageSquad.y-view_yview[0])*windowRatio_y);
-                draw_sprite_ext(spr_engagement_arrow,engagementArrowIndex,((x-view_xview[0])*windowRatio_x)+lengthdir_x(i,dir),((y-view_yview[0])*windowRatio_y)+lengthdir_y(i,dir),1,1,dir,colour,1);
+/* Draw waypoint arrow */
+if(selected) {
+    if (isEngaged) {
+        if (engageSquad != undefined) {
+            if (instance_exists(engageSquad)) {
+                var dist = point_distance((x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,(engageSquad.x-view_xview[0])*windowRatio_x,(engageSquad.y-view_yview[0])*windowRatio_y);
+                if (engageSquad.engageSquad == id) {dist /= 2;}
+                for (var i = dist; i &gt;= 8; i-= 8) {
+                    dir = point_direction((x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,(engageSquad.x-view_xview[0])*windowRatio_x,(engageSquad.y-view_yview[0])*windowRatio_y);
+                    draw_sprite_ext(spr_engagement_arrow,engagementArrowIndex,((x-view_xview[0])*windowRatio_x)+lengthdir_x(i,dir),((y-view_yview[0])*windowRatio_y)+lengthdir_y(i,dir),1,1,dir,colour,1);
+                }
             }
         }
     }
-}
-else {
-    for (var i = point_distance((x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,(dest_x-view_xview[0])*windowRatio_x,(dest_y-view_yview[0])*windowRatio_y); i &gt;= 8; i-= 8) {
-        dir = point_direction((x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,(dest_x-view_xview[0])*windowRatio_x,(dest_y-view_yview[0])*windowRatio_y);
-        draw_sprite_ext(spr_engagement_arrow,engagementArrowIndex,((x-view_xview[0])*windowRatio_x)+lengthdir_x(i,dir),((y-view_yview[0])*windowRatio_y)+lengthdir_y(i,dir),1,1,dir,colour,1);
-    }
-    if (ds_list_size(coordinate_queue) div 2 &gt; 0) {
-        for (var j = 0; j &lt; ds_list_size(coordinate_queue)-2; j += 2) {
-            var xfrom = (ds_list_find_value(coordinate_queue,j)-view_xview[0])*windowRatio_x;
-            var yfrom = (ds_list_find_value(coordinate_queue,j+1)-view_yview[0])*windowRatio_y;
-            var xto = (ds_list_find_value(coordinate_queue,j+2)-view_xview[0])*windowRatio_x;
-            var yto = (ds_list_find_value(coordinate_queue,j+3)-view_yview[0])*windowRatio_y;
-            //draw_text(xfrom,yfrom,string(xfrom)+","+string(yfrom));
-            //draw_text(xfrom+lengthdir_x(dist,d),yfrom+lengthdir_y(dist,d),string(xfrom+lengthdir_x(dist,d))+","+string(yfrom+lengthdir_y(dist,d)));
-            draw_circle_colour(xfrom,yfrom,4,colour,colour,false);
-            draw_circle_colour(xto,yto,4,colour,colour,false);
-            for (var i = point_distance(xfrom,yfrom,xto,yto)-4; i &gt;= 4; i -= 8) {
-                /* draw line */
-                dir = point_direction(xfrom,yfrom,xto,yto);
-                draw_sprite_ext(spr_engagement_arrow,engagementArrowIndex,xfrom+lengthdir_x(i,dir),yfrom+lengthdir_y(i,dir),1,1,dir,colour,1);
+    else {
+        if (isAlly) {
+            for (var i = point_distance((x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,(dest_x-view_xview[0])*windowRatio_x,(dest_y-view_yview[0])*windowRatio_y); i &gt;= 8; i-= 8) {
+                dir = point_direction((x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,(dest_x-view_xview[0])*windowRatio_x,(dest_y-view_yview[0])*windowRatio_y);
+                draw_sprite_ext(spr_engagement_arrow,engagementArrowIndex,((x-view_xview[0])*windowRatio_x)+lengthdir_x(i,dir),((y-view_yview[0])*windowRatio_y)+lengthdir_y(i,dir),1,1,dir,colour,1);
+            }
+            draw_circle_colour((dest_x-view_xview[0])*windowRatio_x,(dest_y-view_yview[0])*windowRatio_y,4,colour,colour,false);
+            if (ds_list_size(coordinate_queue) div 2 &gt; 0) {
+                for (var i = point_distance((dest_x-view_xview[0])*windowRatio_x,(dest_y-view_yview[0])*windowRatio_y,(ds_list_find_value(coordinate_queue,0)-view_xview[0])*windowRatio_x,(ds_list_find_value(coordinate_queue,1)-view_yview[0])*windowRatio_y); i &gt;= 8; i-= 8) {
+                    dir = point_direction((dest_x-view_xview[0])*windowRatio_x,(dest_y-view_yview[0])*windowRatio_y,(ds_list_find_value(coordinate_queue,0)-view_xview[0])*windowRatio_x,(ds_list_find_value(coordinate_queue,1)-view_yview[0])*windowRatio_y);
+                    draw_sprite_ext(spr_engagement_arrow,engagementArrowIndex,((dest_x-view_xview[0])*windowRatio_x)+lengthdir_x(i,dir),((dest_y-view_yview[0])*windowRatio_y)+lengthdir_y(i,dir),1,1,dir,colour,1);
+                }
+                draw_circle_colour((ds_list_find_value(coordinate_queue,0)-view_xview[0])*windowRatio_x,(ds_list_find_value(coordinate_queue,1)-view_yview[0])*windowRatio_y,4,colour,colour,false);
+                for (var j = 0; j &lt; ds_list_size(coordinate_queue)-2; j += 2) {
+                    var xfrom = (ds_list_find_value(coordinate_queue,j)-view_xview[0])*windowRatio_x;
+                    var yfrom = (ds_list_find_value(coordinate_queue,j+1)-view_yview[0])*windowRatio_y;
+                    var xto = (ds_list_find_value(coordinate_queue,j+2)-view_xview[0])*windowRatio_x;
+                    var yto = (ds_list_find_value(coordinate_queue,j+3)-view_yview[0])*windowRatio_y;
+                    //draw_text(xfrom,yfrom,string(xfrom)+","+string(yfrom));
+                    //draw_text(xfrom+lengthdir_x(dist,d),yfrom+lengthdir_y(dist,d),string(xfrom+lengthdir_x(dist,d))+","+string(yfrom+lengthdir_y(dist,d)));
+                    draw_circle_colour(xfrom,yfrom,4,colour,colour,false);
+                    draw_circle_colour(xto,yto,4,colour,colour,false);
+                    for (var i = point_distance(xfrom,yfrom,xto,yto)-4; i &gt;= 4; i -= 8) {
+                        /* draw line */
+                        dir = point_direction(xfrom,yfrom,xto,yto);
+                        draw_sprite_ext(spr_engagement_arrow,engagementArrowIndex,xfrom+lengthdir_x(i,dir),yfrom+lengthdir_y(i,dir),1,1,dir,colour,1);
+                    }
+                }
             }
         }
     }
@@ -331,7 +355,7 @@ if (isEngaged &amp;&amp; (engageSquad != undefined)) {
         iconDirection = point_direction(x,y,engageSquad.x,engageSquad.y);
     }
 }
-draw_sprite_ext(spr_target_icon,0,(x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,1,1,0,colour,1);
+draw_sprite_ext(spr_target_icon,selected,(x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,1,1,0,colour,1);
 draw_sprite(spr_ammo,0,((x-view_xview[0])*windowRatio_x)-20,((y-view_yview[0])*windowRatio_y)+12);
 draw_sprite_part_ext(spr_ammo,1,0,0,(ceil(ammo/round(maxAmmo/8)))*5,6,((x-view_xview[0])*windowRatio_x)-20,((y-view_yview[0])*windowRatio_y)+12,1,1,colour,1);
 if (planesTakingOff) {
@@ -340,9 +364,10 @@ if (planesTakingOff) {
 else if (planesLanding) {
     draw_sprite_ext(spr_landing,-1,(x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,1,1,0,colour,1);
 }
-else {
-    draw_sprite_ext(spr_target,0,(x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,1,1,iconDirection,colour,1);
+else if (isEngaged) {
+    draw_sprite_ext(spr_engaging,-1,(x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,1,1,0,colour,1);
 }
+draw_sprite_ext(spr_squad_number,squadNumber,(x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,1,1,0,colour,1);
 draw_set_font(font);
 draw_set_valign(fa_bottom);
 draw_set_halign(fa_middle);

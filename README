@@ -1,5 +1,13 @@
 rts (name TBD) by mackwafang:
 
+ver 0.3.2.2:
+	- Manual waypoint queue for squadrons are fully implemented
+	- Slight adjustment to squad's idling and waypoint movement 
+	- Adjusted explosion effects
+	- Added squad numerical icon
+	- Added squad attacking icon
+	- Multiple squad selection implemented
+
 ver 0.3.2.1:
 	- Fixed spawning multiple squad while squad is active
 	- Decreased take off time of squads

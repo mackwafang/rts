@@ -29,7 +29,6 @@
 smokeType = part_type_create();
 
 part_type_sprite(smokeType,spr_particle,false,false,false);
-part_type_size(smokeType,0,0,0.1,0);
 part_type_alpha2(smokeType,1,0);
 part_type_color1(smokeType,0);
 part_type_orientation(smokeType,0,360,0,0,0);

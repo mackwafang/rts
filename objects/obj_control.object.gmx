@@ -59,14 +59,24 @@ global.selectedSquad = -1;
 var key = keyboard_key;
 if ((49 &lt;= key) &amp;&amp; (key &lt;= 57)) {
     if (keyboard_check_pressed(key)) {
-        global.selectedSquad = key-49;
+        var v = 1 &lt;&lt; (key-49);
+        if (keyboard_check(vk_shift)) {
+            global.selectedSquad ^= v;
+        }
+        else {
+            global.selectedSquad = turnary((v &gt;&gt; (key-49)) &amp; 1,v,0);
+        }
     }
 }
 /* squad command */
 if (global.selectedSquad &gt;= 0) {
     if (mouse_check_button_pressed(mb_left)) {
-        if (global.squad[global.selectedSquad] == noone) {
-            createSquad(mouse_x,mouse_y,global.selectedSquad,10,obj_ally_plane,true,100001);
+        for (var i = 0; i &lt; 9; i++) {
+            if (getSquadSelected(i)) {
+                if (global.squad[i] == noone) {
+                    createSquad(mouse_x,mouse_y,i,10,obj_ally_plane,true,100001);
+                }
+            }
         }
     }
 }
@@ -124,6 +134,9 @@ var hv = view_hport[0];
 draw_set_valign(fa_top);
 draw_set_halign(fa_left);
 draw_text(0,0,string(mouse_x)+","+string(mouse_y));
+for (var i = 0; i &lt; 9; i++) {
+    draw_text(8*i,16,getSquadSelected(i));
+}
 
 for (var i = 0; i &lt; global.squadsInCommand; i++) {
     var s = global.squad[i];
@@ -134,7 +147,7 @@ for (var i = 0; i &lt; global.squadsInCommand; i++) {
     var xx = (wv/2)+(w*i)+((align+1)*(w/2))-(align*(w/2))-((global.squadsInCommand*w)/2);
     var yy = (hv-(h/2));
     var selected = 0;
-    if (global.selectedSquad == i) {
+    if (getSquadSelected(i)) {
         selected = 1;
     }
     draw_sprite_ext(spr_squad_outline_gui,selected,xx,yy,1,1,0,green,1);
@@ -150,14 +163,15 @@ for (var i = 0; i &lt; global.squadsInCommand; i++) {
         
         if (s != noone) {
             if (s.planesTakingOff) {
-                draw_sprite_ext(spr_take_off,-1,xx,yy,2,2,0,green,1);
+                draw_sprite_ext(spr_take_off,s.image_index,xx,yy,2,2,0,green,1);
             }
             else if (s.planesLanding) {
-                draw_sprite_ext(spr_landing,-1,xx,yy,2,2,0,green,1);
+                draw_sprite_ext(spr_landing,s.image_index,xx,yy,2,2,0,green,1);
             }
-            else {
-                draw_sprite_ext(spr_target,0,xx,yy,2,2,0,green,1);
+            else if (s.isEngaged) {
+                draw_sprite_ext(spr_engaging,s.image_index,xx,yy,2,2,0,green,1);
             }
+            draw_sprite_ext(spr_squad_number,s.squadNumber,xx,yy,2,2,0,green,1);
         }
     }
 }
