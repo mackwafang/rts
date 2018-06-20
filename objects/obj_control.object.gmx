@@ -30,9 +30,14 @@ global.mapView = false;
 
 for (var i = 0; i &lt;= MAX_SQUADS; i++) {
     global.squad[i] = noone;
+    global.squadDelayTime[i] = 60*(BASE_PLANE_ARMING_TIME+10);
 }
-global.squadsInCommand = 6;
-global.selectedSquad = -1;
+global.squadsInCommand = MAX_SQUADS;
+global.selectedSquad = 0;
+
+cooldownFont = font_add_sprite_ext(spr_cooldown_font,"0123456789.",false,-7);
+squadFont = font_add_sprite(spr_squad_font,ord("!"),true,1);
+display_set_gui_size(view_wport[0],view_hport[0]);
 </string>
           </argument>
         </arguments>
@@ -64,38 +69,42 @@ if ((49 &lt;= key) &amp;&amp; (key &lt;= 57)) {
             global.selectedSquad ^= v;
         }
         else {
-            global.selectedSquad = turnary((v &gt;&gt; (key-49)) &amp; 1,v,0);
+            global.selectedSquad = v;//turnary(getSquadSelected(key-49),0,v);
         }
     }
+}
+/* squad delay timer */
+for (var i = 0; i &lt; MAX_SQUADS; i++) {
+    global.squadDelayTime[i] -= 1;
 }
 /* squad command */
 if (global.selectedSquad &gt;= 0) {
     if (mouse_check_button_pressed(mb_left)) {
-        for (var i = 0; i &lt; 9; i++) {
+        for (var i = 0; i &lt; MAX_SQUADS; i++) {
             if (getSquadSelected(i)) {
                 if (global.squad[i] == noone) {
-                    createSquad(mouse_x,mouse_y,i,10,obj_ally_plane,true,100001);
+                    createSquad(mouse_x,mouse_y,i,6,obj_ally_plane,true,100001);
                 }
             }
         }
     }
 }
 if (mouse_check_button_pressed(mb_right)) {
-    createSquad(mouse_x,mouse_y,instance_number(obj_squad),10,obj_enemy_plane,false,100002,true);
+    createSquad(mouse_x,mouse_y,instance_number(obj_squad),6,obj_enemy_plane,false,100002,true);
 }
 /* view scaling */
 var prev_w = view_wview[0];
 var prev_h = view_hview[0];
 if (mouse_wheel_up()) {
-    view_wview[0] -= maxView*0.05;
-    view_hview[0] -= maxView*0.05;
+    view_wview[0] -= 60;
+    view_hview[0] -= 40;
 }
 if (mouse_wheel_down()) {
-    view_wview[0] += maxView*0.05;
-    view_hview[0] += maxView*0.05;
+    view_wview[0] += 60;
+    view_hview[0] += 40;
 }
 view_wview[0] = clamp(view_wview[0],minView,maxView);
-view_hview[0] = clamp(view_hview[0],minView,maxView);
+view_hview[0] = clamp(view_hview[0],minView*(2/3),maxView*(2/3));
 view_xview[0] += (prev_w-view_wview[0])/2;
 view_yview[0] += (prev_h-view_hview[0])/2;
 if (keyboard_check(ord("A"))) {view_xview[0] -= 5;}
@@ -106,6 +115,30 @@ if (keyboard_check_pressed(vk_space)) {
     view_wview[0] = 960;
     view_hview[0] = 960;
 }
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="7" enumb="5">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>font_delete(cooldownFont);
+font_delete(squadFont);
 </string>
           </argument>
         </arguments>
@@ -137,6 +170,7 @@ draw_text(0,0,string(mouse_x)+","+string(mouse_y));
 for (var i = 0; i &lt; 9; i++) {
     draw_text(8*i,16,getSquadSelected(i));
 }
+draw_text(0,32,global.selectedSquad);
 
 for (var i = 0; i &lt; global.squadsInCommand; i++) {
     var s = global.squad[i];
@@ -151,27 +185,42 @@ for (var i = 0; i &lt; global.squadsInCommand; i++) {
         selected = 1;
     }
     draw_sprite_ext(spr_squad_outline_gui,selected,xx,yy,1,1,0,green,1);
-    if (s != noone) {
-        draw_sprite(spr_ammo,0,xx-((w-spacing)/2),yy-3-(h/2));
-        draw_sprite_part_ext(spr_ammo,1,0,0,(ceil(s.ammo/round(s.maxAmmo/8)))*5,6,xx-((w-spacing)/2),yy-3-(h/2),1,1,green,1);
-        draw_set_valign(fa_bottom);
+    if (global.squadDelayTime[i] &gt; 0) {
+        draw_set_valign(fa_middle);
         draw_set_halign(fa_center);
-        
-        draw_set_colour(green);
-        draw_text(xx,yy-6-(h/2),string(s.membersAlive)+"/"+string(s.squadSize));
-        draw_set_colour(white);
-        
+        draw_set_font(cooldownFont);
+        var v = string(global.squadDelayTime[i] div 60);
+        if (global.squadDelayTime[i] &lt; 600) {
+            v = string_format(global.squadDelayTime[i]/60,1,1);
+        }
+        rectangleCooldown(xx-(w-spacing)/2,yy-(h-spacing)/2,xx+(w-spacing)/2,yy+(h-spacing)/2,global.squadDelayTime[i],60*(BASE_PLANE_ARMING_TIME+10),0,0.5);
+        draw_text(xx-4,yy,v);
+    }
+    else {
         if (s != noone) {
-            if (s.planesTakingOff) {
-                draw_sprite_ext(spr_take_off,s.image_index,xx,yy,2,2,0,green,1);
+            draw_sprite(spr_ammo,0,xx-((w-spacing)/2),yy-5-(h/2));
+            draw_sprite_part_ext(spr_ammo,1,0,0,(ceil(s.ammo/round(s.maxAmmo/8)))*5,10,xx-((w-spacing)/2),yy-5-(h/2),1,1,green,1);
+            draw_set_valign(fa_bottom);
+            draw_set_halign(fa_center);
+            draw_set_font(squadFont);
+            draw_set_colour(green);
+            draw_text(xx,yy-10-(h/2),string(s.membersAlive)+"/"+string(s.squadSize));
+            draw_set_colour(white);
+            
+            if (s != noone) {
+                if (s.planesTakingOff) {
+                    draw_sprite_ext(spr_take_off,s.image_index,xx,yy,2,2,0,green,1);
+                }
+                else if (s.planesLanding) {
+                    draw_sprite_ext(spr_landing,s.image_index,xx,yy,2,2,0,green,1);
+                }
+                else if (s.isEngaged) {
+                    draw_sprite_ext(spr_engaging,s.image_index,xx,yy,2,2,0,green,1);
+                }
+                draw_sprite_ext(spr_squad_number,s.squadNumber,xx,yy,1,1,0,green,1);
+                draw_sprite(spr_squad_hp_bar,0,xx-((w-spacing)/2),yy-10-(h/2));
+                draw_sprite_part_ext(spr_squad_hp_bar,1,0,0,(s.hp/s.maxhp)*40,5,xx-((w-spacing)/2),yy-10-(h/2),1,1,green,1);
             }
-            else if (s.planesLanding) {
-                draw_sprite_ext(spr_landing,s.image_index,xx,yy,2,2,0,green,1);
-            }
-            else if (s.isEngaged) {
-                draw_sprite_ext(spr_engaging,s.image_index,xx,yy,2,2,0,green,1);
-            }
-            draw_sprite_ext(spr_squad_number,s.squadNumber,xx,yy,2,2,0,green,1);
         }
     }
 }

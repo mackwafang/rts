@@ -31,6 +31,8 @@ isAlly = true;
 takeOff = false; // plane is attempting taking off
 landing = false; // plane is attempting to land
 isLandingInProgress = false; // plane is in process of landing
+idling_x = irandom_range(-5,5)*8; //use when plane is idling/moving towards waypoint
+idling_y = irandom_range(-5,5)*8; //use when plane is idling/moving towards waypoint
 takeOffFrom = noone;
 
 baseMoveSpeed = 4;
@@ -54,6 +56,8 @@ fovAngle = 10;
 idleSide = 1; //the side to go when plane is idling
 
 propellerIndex = 0;
+planeImageIndex = image_number/2;
+image_index = planeImageIndex;
 fire = 0;
 </string>
           </argument>
@@ -134,6 +138,7 @@ if ((!takeOff &amp;&amp; !landing)) {
             }
             turnRate = angle_difference(point_direction(x,y,chaseTarget.x,chaseTarget.y),direction);
             if (isEngaged) {
+                /* plane is engaging */
                 if (distance_to_object(assignedSquad) &lt; assignedSquad.baseEngageRange) {
                     /* turn towards enemy */
                     if (chaseTarget.object_index != obj_squad) {
@@ -158,10 +163,10 @@ if ((!takeOff &amp;&amp; !landing)) {
                 }
             }
             else {
-                // idling around requested location
+                /* idling around requested location */
                 if (distance_to_object(assignedSquad) &lt; assignedSquad.baseEngageRange/4) {
                     if (irandom(200)) {idleSide *= -1;}
-                    turnRate = angle_difference(point_direction(x,y,chaseTarget.x,chaseTarget.y)+(90*idleSide),direction);
+                    turnRate = angle_difference(point_direction(x,y,chaseTarget.x+idling_x,chaseTarget.y+idling_y)+(90*idleSide),direction);
                 }
             }
         }
@@ -193,7 +198,7 @@ if ((!takeOff &amp;&amp; !landing)) {
     }
     if (isEngaged) {moveSpeed = baseMoveSpeed;} else {moveSpeed = baseMoveSpeed*0.5;}
     if (fire &lt;= 0) {fire++;}
-    image_index = clamp(-(turnRate*4)+15,0,image_number-1);
+    planeImageIndex = clamp(round(-(turnRate*5)+(image_number/2)),0,image_number-2);
     speed = var_wipe(speed,moveSpeed,200,0,0.1);
     direction += turnRate*turnRateCof;
 }
@@ -201,7 +206,7 @@ else {
     if (takeOff) {
         direction = takeOffFrom.direction;
         speed = var_wipe(speed,5,100,0,0.01);
-        image_index = 15;
+        planeImageIndex = image_number/2;
         if (!place_meeting(x,y,takeOffFrom)) {
             image_xscale = var_wipe(image_xscale,1,100,0.1,0);
             image_yscale = var_wipe(image_yscale,1,100,0.1,0);
@@ -223,8 +228,8 @@ else {
                 image_xscale = var_wipe(image_xscale,0.5,100,0.1,0);
                 image_yscale = var_wipe(image_yscale,0.5,100,0.1,0);
                 if ((image_xscale &lt;= 0.5) &amp;&amp; (image_yscale &lt;= 0.5)) {
-                    image_xscale = 1;
-                    image_yscale = 1;
+                    image_xscale = 0.5;
+                    image_yscale = 0.5;
                 }
                 if (speed == 0) {
                     /* plane has landed */
@@ -236,7 +241,7 @@ else {
             }
         }
         else {
-            if (distance_to_object(assignedSquad) &lt; 48) {
+            if (distance_to_object(assignedSquad) &lt; 96) {
                 angle = angle_difference(point_direction(x,y,takeOffFrom.x,takeOffFrom.y),direction)/20;
                 isLandingInProgress = true;
             }
@@ -245,6 +250,7 @@ else {
     }
 }
 image_angle = direction;
+image_index = var_wipe(image_index,planeImageIndex,100,0,0.1);
 propellerIndex = (++propellerIndex) mod 4;
 if (!canMove) {speed = 0;}
 </string>

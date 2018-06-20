@@ -1,5 +1,10 @@
 rts (name TBD) by mackwafang:
 
+Change Log:
+ver 0.3.3:
+	- Partially added cooldown system
+	- Added landing queue (waypoints then land)
+
 ver 0.3.2.2:
 	- Manual waypoint queue for squadrons are fully implemented
 	- Slight adjustment to squad's idling and waypoint movement 
