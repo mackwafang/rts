@@ -5,7 +5,7 @@
   <visible>-1</visible>
   <depth>900</depth>
   <persistent>0</persistent>
-  <parentName>&lt;undefined&gt;</parentName>
+  <parentName>obj_bomb_target</parentName>
   <maskName>&lt;undefined&gt;</maskName>
   <events>
     <event eventtype="0" enumb="0">
@@ -28,13 +28,14 @@
             <string>isAlly = true; //is runway part of player?
 takeOff = false;
 landing = false;
-
+isLandInstallation = false; //is runway on land
 
 planesRequired = 0; //number of planes required to send out or take in
 squadQueue = ds_queue_create();
 useTime = 0; //takeoff/landing time
 sendPlaneToSquad = undefined;
 maxUseTime = 30;
+event_inherited();
 </string>
           </argument>
         </arguments>
@@ -80,25 +81,37 @@ maxUseTime = 30;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>image_angle = direction;
+            <string>event_inherited();
+image_angle = direction;
 /* take off */
 if (takeOff) {
     if (useTime &lt; 0) {
         if (planesRequired &gt; 0) {
             /* send a plane out */
-            sendPlaneToSquad.squadMember[sendPlaneToSquad.squadSize-planesRequired] = createPlane(x,y,direction,sendPlaneToSquad.planeType,sendPlaneToSquad,sendPlaneToSquad.isAlly,id);
-            with(sendPlaneToSquad) {
-                if (isEngaged) {
-                    if (engageSquad != undefined) {
-                        if (instance_exists(engageSquad)) {
-                            assignEnemy(engageSquad);
+            var canSend = false;
+            if (isAlly) {
+                if (global.squadDelayTime[sendPlaneToSquad.squadNumber] &lt;= 0) {
+                    canSend = true;
+                }
+            }
+            else {
+                canSend = true;
+            }
+            if (canSend) {
+                sendPlaneToSquad.squadMember[sendPlaneToSquad.squadSize-planesRequired] = createPlane(x,y,direction,sendPlaneToSquad.planeType,sendPlaneToSquad,sendPlaneToSquad.isAlly,id);
+                with(sendPlaneToSquad) {
+                    if (isEngaged) {
+                        if (engageSquad != undefined) {
+                            if (instance_exists(engageSquad)) {
+                                assignEnemy(engageSquad);
+                            }
                         }
                     }
                 }
+                print("sending out an aircraft, "+string(planesRequired)+" planes left");
+                planesRequired--;
+                useTime = maxUseTime;
             }
-            print("sending out an aircraft, "+string(planesRequired)+" planes left");
-            planesRequired--;
-            useTime = maxUseTime;
         }
         else {
             if (sendPlaneToSquad != undefined) {

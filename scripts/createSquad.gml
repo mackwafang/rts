@@ -21,6 +21,15 @@ if (isAlly) {
 s.squadNumber = squadNumber;
 s.planeType = planeType;
 s.squadSize = squadSize;
+switch(planeType) {
+    case obj_ally_plane: case obj_enemy_plane:
+        s.combatRole = 0;
+        break;
+    case obj_ally_bomber:
+        s.combatRole = 2;
+        s.speedMultiplier = 0.75;
+        break;
+}
 for (var i = 0; i < squadSize; i++) {
     s.squadMember[i] = noone;
 }

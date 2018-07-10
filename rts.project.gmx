@@ -12,8 +12,11 @@
     <sprite>sprites\spr_ally_plane</sprite>
     <sprite>sprites\spr_enemy_plane</sprite>
     <sprite>sprites\spr_target</sprite>
-    <sprite>sprites\spr_landing</sprite>
-    <sprite>sprites\spr_take_off</sprite>
+    <sprite>sprites\spr_squad_landing</sprite>
+    <sprite>sprites\spr_squad_take_off</sprite>
+    <sprite>sprites\spr_squad_ready</sprite>
+    <sprite>sprites\spr_squad_engaging</sprite>
+    <sprite>sprites\spr_squad_escort</sprite>
     <sprite>sprites\spr_target_icon</sprite>
     <sprite>sprites\spr_bullet</sprite>
     <sprite>sprites\spr_particle</sprite>
@@ -24,9 +27,9 @@
     <sprite>sprites\spr_ammo</sprite>
     <sprite>sprites\spr_squad_hp_bar</sprite>
     <sprite>sprites\spr_squad_outline_gui</sprite>
-    <sprite>sprites\spr_engaging</sprite>
     <sprite>sprites\spr_squad_number</sprite>
     <sprite>sprites\spr_cooldown_font</sprite>
+    <sprite>sprites\spr_land_target</sprite>
   </sprites>
   <backgrounds name="background">
     <background>background\background0</background>
@@ -46,25 +49,27 @@
     <script>scripts\assignEnemy.gml</script>
     <script>scripts\availableSquad.gml</script>
     <script>scripts\landSquad.gml</script>
-    <script>scripts\getSquadSelected.gml</script>
+    <script>scripts\isSquadSelected.gml</script>
     <script>scripts\turnary.gml</script>
     <script>scripts\rectangleCooldown.gml</script>
   </scripts>
   <objects name="objects">
     <object>objects\obj_plane_parent</object>
     <object>objects\obj_ally_plane</object>
+    <object>objects\obj_ally_bomber</object>
     <object>objects\obj_enemy_plane</object>
     <object>objects\obj_squad</object>
     <object>objects\obj_bullet</object>
     <object>objects\obj_control</object>
     <object>objects\obj_explosion_sharpnel</object>
     <object>objects\obj_runway</object>
+    <object>objects\obj_bomb_target</object>
   </objects>
   <rooms name="rooms">
     <room>rooms\room0</room>
   </rooms>
   <constants number="14">
-    <constant name="BASE_PLANE_ARMING_TIME">10</constant>
+    <constant name="BASE_PLANE_ARMING_TIME">1</constant>
     <constant name="MAX_SQUADS">9</constant>
     <constant name="maxView">1600</constant>
     <constant name="minView">256</constant>

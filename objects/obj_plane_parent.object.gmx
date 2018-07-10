@@ -27,7 +27,7 @@
             <kind>1</kind>
             <string>canMove = true;
 canShoot = true;
-isAlly = true;
+isAlly = true; // is plane an ally
 takeOff = false; // plane is attempting taking off
 landing = false; // plane is attempting to land
 isLandingInProgress = false; // plane is in process of landing
@@ -37,13 +37,15 @@ takeOffFrom = noone;
 
 baseMoveSpeed = 4;
 moveSpeed = 4;
+combatRole = 0; //role of plane, 0 = fighter, 1 = torp. bomber, 2 = dive bomber
 turnRateCof = 1; //turn rate coefficient
 fireRate = 7; //fire rate
 maxhp = 60;
 hp = maxhp;
 attack = 10;
+bombsDropped = false;
 
-chaseTarget = undefined; //object for go after
+chaseTarget = undefined; //object for go after (object id)
 assignedSquad = undefined; //the assigned squad (object id)
 isEngaged = false; //is plane engaged in combat
 engagedSquad = undefined; // the squad that is engaged
@@ -105,19 +107,38 @@ if ((!takeOff &amp;&amp; !landing)) {
             }
             if (inViewRangeAny(chaseTarget,fovAngle,fovRange)) {
                 /* shoot when in range */
-                if (chaseTarget.object_index != obj_squad) {
+                //if (chaseTarget.object_index != obj_squad) {
                     chaseTimer = 0;
                     if (assignedSquad.ammo &gt; 0) {
-                        if (fire &gt; 0) {
-                            fire -= fireRate;
-                            assignedSquad.ammo -= 2;
-                            var dist = point_distance(x,y,x,y+6);
-                            var dir = image_angle+point_direction(x,y,x,y+6);
-                            shootBullet(x+lengthdir_x(dist,dir),y+lengthdir_y(dist,dir),20,direction,attack);
-                            
-                            var dist = point_distance(x,y,x,y-6);
-                            var dir = image_angle+point_direction(x,y,x,y-6);
-                            shootBullet(x+lengthdir_x(dist,dir),y+lengthdir_y(dist,dir),20,direction,attack);
+                        switch(combatRole) {
+                            case 0:
+                                /* Air v Air combat */
+                                if (chaseTarget != assignedSquad) {
+                                    if (fire &gt; 0) {
+                                        fire -= fireRate;
+                                        assignedSquad.ammo -= 2;
+                                        var dist = point_distance(x,y,x,y+6);
+                                        var dir = image_angle+point_direction(x,y,x,y+6);
+                                        shootBullet(x+lengthdir_x(dist,dir),y+lengthdir_y(dist,dir),20,direction,attack);
+                                        
+                                        var dist = point_distance(x,y,x,y-6);
+                                        var dir = image_angle+point_direction(x,y,x,y-6);
+                                        shootBullet(x+lengthdir_x(dist,dir),y+lengthdir_y(dist,dir),20,direction,attack);
+                                    }
+                                }
+                                break;
+                            case 2:
+                                /* Air v Ground (dive bomber) combat */
+                                if (object_get_parent(chaseTarget.object_index) == obj_bomb_target) {
+                                    if (!bombsDropped) {
+                                        bombsDropped = true;
+                                        assignedSquad.ammo -= assignedSquad.maxAmmo/assignedSquad.squadSize;
+                                        chaseTarget.hp -= attack*10;
+                                        chaseTarget = assignedSquad;
+                                        isEngaged = false;
+                                    }
+                                }
+                                break;
                         }
                     }
                     else {
@@ -131,10 +152,13 @@ if ((!takeOff &amp;&amp; !landing)) {
                         assignedSquad.canEngage = false;
                         assignedSquad.isEngaged = false;
                         assignedSquad.planesLanding = true;
-                        assignedSquad.dest_x = takeOffFrom.x+lengthdir_x(-256,takeOffFrom.direction);
-                        assignedSquad.dest_y = takeOffFrom.y+lengthdir_y(-256,takeOffFrom.direction);
+                        with(assignedSquad) {
+                            landSquad();
+                        }
+                        /*assignedSquad.dest_x = takeOffFrom.x+lengthdir_x(-256,takeOffFrom.direction);
+                        assignedSquad.dest_y = takeOffFrom.y+lengthdir_y(-256,takeOffFrom.direction);*/
                     }
-                }
+                //}
             }
             turnRate = angle_difference(point_direction(x,y,chaseTarget.x,chaseTarget.y),direction);
             if (isEngaged) {
