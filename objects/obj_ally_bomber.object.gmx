@@ -26,12 +26,15 @@
           <argument>
             <kind>1</kind>
             <string>event_inherited();
+maxhp += 100;
+hp = maxhp;
 chaseTarget = obj_squad;
 turnRateCof = 0.9;
 baseMoveSpeed = 3;
 combatRole = 2;
 canEngage = false;
-fovAngle = 180;
+fovAngle = 45;
+fovRange = 16;
 </string>
           </argument>
         </arguments>

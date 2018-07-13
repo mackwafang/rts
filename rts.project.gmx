@@ -28,6 +28,7 @@
     <sprite>sprites\spr_squad_hp_bar</sprite>
     <sprite>sprites\spr_squad_outline_gui</sprite>
     <sprite>sprites\spr_squad_number</sprite>
+    <sprite>sprites\spr_squad_number_small</sprite>
     <sprite>sprites\spr_cooldown_font</sprite>
     <sprite>sprites\spr_land_target</sprite>
   </sprites>
@@ -44,6 +45,7 @@
     <script>scripts\createSquad.gml</script>
     <script>scripts\createPlane.gml</script>
     <script>scripts\shootBullet.gml</script>
+    <script>scripts\dropBomb.gml</script>
     <script>scripts\fireParticleInit.gml</script>
     <script>scripts\explosionEffect.gml</script>
     <script>scripts\assignEnemy.gml</script>
@@ -69,7 +71,7 @@
     <room>rooms\room0</room>
   </rooms>
   <constants number="14">
-    <constant name="BASE_PLANE_ARMING_TIME">1</constant>
+    <constant name="BASE_PLANE_ARMING_TIME">10</constant>
     <constant name="MAX_SQUADS">9</constant>
     <constant name="maxView">1600</constant>
     <constant name="minView">256</constant>

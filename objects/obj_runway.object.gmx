@@ -29,6 +29,7 @@
 takeOff = false;
 landing = false;
 isLandInstallation = false; //is runway on land
+isDestroyed = false;
 
 planesRequired = 0; //number of planes required to send out or take in
 squadQueue = ds_queue_create();
@@ -84,56 +85,80 @@ event_inherited();
             <string>event_inherited();
 image_angle = direction;
 /* take off */
-if (takeOff) {
-    if (useTime &lt; 0) {
-        if (planesRequired &gt; 0) {
-            /* send a plane out */
-            var canSend = false;
-            if (isAlly) {
-                if (global.squadDelayTime[sendPlaneToSquad.squadNumber] &lt;= 0) {
+if (!isDestroyed) {
+    if (takeOff) {
+        if (useTime &lt; 0) {
+            if (planesRequired &gt; 0) {
+                /* send a plane out */
+                var canSend = false;
+                if (isAlly) {
+                    if (global.squadDelayTime[sendPlaneToSquad.squadNumber] &lt;= 0) {
+                        canSend = true;
+                    }
+                }
+                else {
                     canSend = true;
                 }
-            }
-            else {
-                canSend = true;
-            }
-            if (canSend) {
-                sendPlaneToSquad.squadMember[sendPlaneToSquad.squadSize-planesRequired] = createPlane(x,y,direction,sendPlaneToSquad.planeType,sendPlaneToSquad,sendPlaneToSquad.isAlly,id);
-                with(sendPlaneToSquad) {
-                    if (isEngaged) {
-                        if (engageSquad != undefined) {
-                            if (instance_exists(engageSquad)) {
-                                assignEnemy(engageSquad);
+                if (canSend) {
+                    sendPlaneToSquad.squadMember[sendPlaneToSquad.squadSize-planesRequired] = createPlane(x,y,direction,sendPlaneToSquad.planeType,sendPlaneToSquad,sendPlaneToSquad.isAlly,id);
+                    with(sendPlaneToSquad) {
+                        if (isEngaged) {
+                            if (engageSquad != undefined) {
+                                if (instance_exists(engageSquad)) {
+                                    assignEnemy(engageSquad);
+                                }
                             }
                         }
                     }
+                    print("sending out an aircraft, "+string(planesRequired)+" planes left");
+                    planesRequired--;
+                    useTime = maxUseTime;
+                    with(sendPlaneToSquad) {
+                        speed += 0.25;
+                        direction = other.image_angle;
+                    }
                 }
-                print("sending out an aircraft, "+string(planesRequired)+" planes left");
-                planesRequired--;
-                useTime = maxUseTime;
+            }
+            else {
+                var allTookOff = false;
+                if (sendPlaneToSquad != undefined) {
+                    var planesTakenOff = 0;
+                    for (var i = 0; i &lt; sendPlaneToSquad.squadSize; i++) {
+                        var p = sendPlaneToSquad.squadMember[i];
+                        if (p != undefined) {
+                            if (instance_exists(p)) {
+                                if (!p.takeOff) {
+                                    planesTakenOff++;
+                                }
+                            }
+                        }
+                    }
+                    print(planesTakenOff);
+                    if (planesTakenOff == sendPlaneToSquad.membersAlive) {allTookOff = true;}
+                } else {allTookOff = true;}
+                if (allTookOff) {
+                    if (sendPlaneToSquad != undefined) {
+                        if (instance_exists(sendPlaneToSquad)) {
+                            sendPlaneToSquad.planesTakingOff = false;
+                        }
+                    }
+                    if (ds_queue_size(squadQueue) &gt; 0) {
+                        //sending planes for next squad in line
+                        sendPlaneToSquad = ds_queue_dequeue(squadQueue);
+                        planeType = sendPlaneToSquad.planeType;
+                        planesRequired = sendPlaneToSquad.squadSize;
+                        sendPlaneToSquad.visible = true;
+                    }
+                    else {
+                        takeOff = false; //runway is now free
+                        sendPlaneToSquad = undefined;
+                    }
+                }
             }
         }
         else {
-            if (sendPlaneToSquad != undefined) {
-                if (instance_exists(sendPlaneToSquad)) {
-                    sendPlaneToSquad.planesTakingOff = false;
-                }
-            }
-            if (ds_queue_size(squadQueue) &gt; 0) {
-                //sending planes for next squad in line
-                sendPlaneToSquad = ds_queue_dequeue(squadQueue);
-                planeType = sendPlaneToSquad.planeType;
-                planesRequired = sendPlaneToSquad.squadSize;
-                sendPlaneToSquad.visible = true;
-            }
-            else {
-                takeOff = false; //runway is now free
-                sendPlaneToSquad = undefined;
-            }
+            useTime--;
         }
-    }
-    else {
-        useTime--;
     }
 }
 </string>

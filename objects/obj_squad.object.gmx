@@ -40,7 +40,7 @@ maxhp = 0;
 combatRole = 0;
 squadNumber = -1;
 squadSize = 6; //number of planes in squad
-maxAmmo = 150*squadSize; //max amount of ammo
+maxAmmo = 250*squadSize; //max amount of ammo
 ammo = maxAmmo;
 membersAlive = 6; //how many planes are active
 planeType = noone;
@@ -58,6 +58,10 @@ ai_control = false; // is squad controled automatically
 
 engagementArrowIndex = 0;
 coordinate_queue = ds_list_create();
+statusIconSwitchTimer = 0;
+
+statusImage = 0; /* used for drawing icons */
+subImage = -1; /* used for drawing icons */
 
 font = font_add_sprite(spr_squad_font,ord("!"),true,1);
 alarm[0] = 1;
@@ -86,7 +90,7 @@ alarm[0] = 1;
             <string>font_delete(font);
 if (isAlly) {
     global.squad[squadNumber] = noone;
-    global.squadDelayTime[squadNumber] = 60*(BASE_PLANE_ARMING_TIME);
+    global.squadDelayTime[squadNumber] = 60*(BASE_PLANE_ARMING_TIME+10);
 }
 ds_list_destroy(coordinate_queue);
 </string>
@@ -151,6 +155,7 @@ alarm[0] = 100;
             <string>if (engageSquad != undefined) {
     if (!instance_exists(engageSquad)) {
         engageSquad = undefined;
+        isEngaged = false;
     }
 }
 var membersDestroyed = 0;
@@ -240,9 +245,13 @@ if (!planesTakingOff) {
                     angle = angle_difference(point_direction(x,y,dest_x,dest_y)+90,direction);
                     /* set bombers to attack */
                     if (escortSquad != undefined) {
-                        if (combatRole != 0) {
-                            if (ammo &gt; 0) {
-                                isEngaged = true;
+                        if (instance_exists(escortSquad)) {
+                            if (object_get_parent(escortSquad.object_index) == obj_bomb_target) {
+                                if (combatRole != 0) {
+                                    if (ammo &gt; 0) {
+                                        isEngaged = true;
+                                    }
+                                }
                             }
                         }
                     }
@@ -308,28 +317,39 @@ if (!ai_control &amp;&amp; isAlly) {
             }
             planesLanding = false;
             landingQueued = false;
-            engageTarget = undefined;
         }
         if (keyboard_check_pressed(ord("F"))) {
             /* land squad */
             landSquad(queueNewCoordinate);
         }
-    }
-}
-if (!selected) {
-    /* set selected squad to perform action on other squads */
-    for (var i = 0; i &lt; MAX_SQUADS; i++) {
-        var s = global.squad[i];
-        if (s != noone) {
-            if (s.selected) {
-                var clickRange = 64;
-                if (mouse_check_button_pressed(mb_left)) {
-                    if (inSquare(mouse_x,mouse_y,x-clickRange,y-clickRange,x+clickRange,y+clickRange)) {
-                        ds_list_clear(coordinate_queue);
-                        s.escortSquad = id;
+        /* set selected squad to perform action on other squads */
+        var clickRange = 64;
+        if (mouse_check_button_pressed(mb_left)) {
+            for (var i = 0; i &lt; instance_count; i++) {
+                var obj = instance_id[i];
+                if (inSquare(mouse_x,mouse_y,obj.x-clickRange,obj.y-clickRange,obj.x+clickRange,obj.y+clickRange)) {
+                    ds_list_clear(coordinate_queue);
+                    switch(obj.object_index) {
+                        case obj_squad:
+                            if ((obj.isAlly == isAlly) || combatRole == 0) {
+                                escortSquad = obj;
+                            }
+                            break;
+                        case obj_runway:
+                            if (object_get_parent(obj.object_index) == obj_bomb_target) {
+                                if (combatRole != 0 &amp;&amp; obj.isAlly != isAlly) {
+                                    escortSquad = obj;
+                                    engageSquad = obj;
+                                }
+                            }
+                            break;
                     }
-                    else {
-                        s.escortSquad = undefined;
+                    break;
+                }
+                else {
+                    escortSquad = undefined;
+                    if (combatRole != 0) {
+                        engageSquad = undefined;
                     }
                 }
             }
@@ -420,9 +440,8 @@ if (isEngaged &amp;&amp; (engageSquad != undefined)) {
     }
 }
 draw_sprite_ext(spr_target_icon,selected,(x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,1,1,0,colour,1);
-draw_sprite(spr_ammo,0,((x-view_xview[0])*windowRatio_x)-20,((y-view_yview[0])*windowRatio_y)+12);
-draw_sprite_part_ext(spr_ammo,1,0,0,(ceil(ammo/round(maxAmmo/8)))*5,10,((x-view_xview[0])*windowRatio_x)-20,((y-view_yview[0])*windowRatio_y)+12,1,1,colour,1);
-var statusImage = -1;
+draw_sprite(spr_ammo,2*combatRole,((x-view_xview[0])*windowRatio_x)-20,((y-view_yview[0])*windowRatio_y)+12);
+draw_sprite_part_ext(spr_ammo,(2*combatRole)+1,0,0,(ceil(ammo/round(maxAmmo/8)))*5,10,((x-view_xview[0])*windowRatio_x)-20,((y-view_yview[0])*windowRatio_y)+12,1,1,colour,1);
 if (planesTakingOff) {
     statusImage = spr_squad_take_off;
 }
@@ -433,14 +452,30 @@ else if (isEngaged) {
     statusImage = spr_squad_engaging;
 }
 else if (escortSquad != undefined) {
-    if (escortSquad.isAlly) {
-        statusImage = spr_squad_escort;
+    if (instance_exists(escortSquad)) {
+        if (escortSquad.isAlly) {
+            statusImage = spr_squad_escort;
+        }
+        else {
+            statusImage = spr_squad_engaging;
+        }
     }
 }
-if (statusImage != -1) {
-    draw_sprite_ext(statusImage,-1,(x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,1,1,0,colour,1);
+else {
+    statusImage = spr_target;
 }
-draw_sprite_ext(spr_squad_number,squadNumber,(x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,1,1,0,colour,1);
+statusIconSwitchTimer = ++statusIconSwitchTimer mod 240;
+switch (statusIconSwitchTimer div 120) {
+    case 0:
+        draw_sprite_ext(spr_squad_number,squadNumber,(x-view_xview[0])*windowRatio_x,((y-view_yview[0])*windowRatio_y),1,1,0,colour,1);
+        break;
+    case 1:
+        if (statusImage != -1) {
+            if (statusImage == spr_target) {subImage = combatRole;} else {subImage = -1;}
+            draw_sprite_ext(statusImage,subImage,(x-view_xview[0])*windowRatio_x,(y-view_yview[0])*windowRatio_y,1,1,0,colour,1);
+        }
+        break;
+}
 draw_set_font(font);
 draw_set_valign(fa_bottom);
 draw_set_halign(fa_middle);

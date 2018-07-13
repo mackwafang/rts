@@ -1,6 +1,15 @@
 rts (name TBD) by mackwafang:
 
 Change Log:
+ver 0.3.5.1:
+	- Added squad type icon
+	- Fighter now matches bomber's speed while in combat
+	- Fighter ammunition increased from 150 to 250 per plane
+	- Fighter ammo consumpt reduced from 2 to 1
+	- Bomber's max HP increased by 100 units
+	- Changed squad takeoff method
+	- Changed internal method of squad order
+
 ver 0.3.5:
 	- Air vs. Ground (dive bombers) combat implemented
 	

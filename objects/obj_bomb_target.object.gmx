@@ -29,6 +29,7 @@
 hp = maxhp;
 displayhp = hp;
 child = -1;
+isDestroyed = false;
 </string>
           </argument>
         </arguments>
@@ -58,28 +59,33 @@ if (hp &lt;= 0) {
 if ((child = object_get_parent(obj_bomb_target)) != -1) {
     isAlly = child.isAlly;
 }
-if (keyboard_check_pressed(vk_space)) {hp -= 500;}
-/* set selected squad to perform action on bombing targets */
-for (var i = 0; i &lt; MAX_SQUADS; i++) {
-    var s = global.squad[i];
-    if (s != noone) {
-        if (s.isAlly != isAlly) {
-            if (s.selected) {
-                if (s.combatRole != 0) { // check plane type if it's not fighters
-                    if (mouse_check_button_pressed(mb_left)) {
-                        var size = max(sprite_width,sprite_height);
-                        if (inSquare(mouse_x,mouse_y,x-size,y-size,x+size,y+size)) {
-                            ds_list_clear(s.coordinate_queue);
-                            s.engageSquad = id;
-                            s.escortSquad = id;
-                        }
-                        else {
-                            s.engageSquad = undefined;
-                            s.escortSquad = undefined;
-                        }
-                    }
-                }
-            }
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="4" ename="obj_bullet">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>if (other.isBomb) {
+    if (other.alarm[0] &lt;= 2) {
+        if (!isDestroyed) {
+            hp -= other.damage;
+            instance_destroy(other);
         }
     }
 }

@@ -27,7 +27,8 @@ switch(planeType) {
         break;
     case obj_ally_bomber:
         s.combatRole = 2;
-        s.speedMultiplier = 0.75;
+        s.speedMultiplier = 0.7;
+        s.canEngage = false;
         break;
 }
 for (var i = 0; i < squadSize; i++) {

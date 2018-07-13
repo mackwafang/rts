@@ -30,10 +30,11 @@ global.mapView = false;
 
 for (var i = 0; i &lt;= MAX_SQUADS; i++) {
     global.squad[i] = noone;
-    global.squadDelayTime[i] = 60*(BASE_PLANE_ARMING_TIME);
+    global.squadDelayTime[i] = 60*(BASE_PLANE_ARMING_TIME+10);
 }
 global.squadsInCommand = MAX_SQUADS;
 global.selectedSquad = 0;
+global.mouseOnObject = noone;
 
 cooldownFont = font_add_sprite_ext(spr_cooldown_font,"0123456789.",false,-7);
 global.gameFont = font_add_sprite(spr_squad_font,ord("!"),true,1);
@@ -193,7 +194,7 @@ for (var i = 0; i &lt; global.squadsInCommand; i++) {
         draw_set_halign(fa_center);
         draw_set_font(cooldownFont);
         var v = string(global.squadDelayTime[i] div 60);
-        if (global.squadDelayTime[i] &lt; 600) {
+        if (global.squadDelayTime[i] &lt;= 600) {
             v = string_format(global.squadDelayTime[i]/60,1,1);
         }
         rectangleCooldown(xx-(w-spacing)/2,yy-(h-spacing)/2,xx+(w-spacing)/2,yy+(h-spacing)/2,global.squadDelayTime[i],60*(BASE_PLANE_ARMING_TIME+10),0,0.5);
@@ -208,28 +209,11 @@ for (var i = 0; i &lt; global.squadsInCommand; i++) {
             draw_set_font(squadFont);
             draw_set_colour(green);
             draw_text(xx,yy-10-(h/2),string(s.membersAlive)+"/"+string(s.squadSize));
-            draw_set_colour(white);
-            
-            if (s != noone) {
-                var statusImage = -1;
-                if (s.planesTakingOff) {
-                    statusImage = spr_squad_take_off;
-                }
-                else if (s.planesLanding) {
-                    statusImage = spr_squad_landing;
-                }
-                else if (s.isEngaged) {
-                    statusImage = spr_squad_engaging;
-                }
-                else if (s.escortSquad != undefined) {
-                    if (s.escortSquad.isAlly) {
-                        statusImage = spr_squad_escort;
-                    }
-                }
-                if (statusImage != -1) {draw_sprite_ext(statusImage,s.image_index,xx,yy,2,2,0,green,1);}
-                draw_sprite(spr_squad_hp_bar,0,xx-((w-spacing)/2),yy-10-(h/2));
-                draw_sprite_part_ext(spr_squad_hp_bar,1,0,0,(s.hp/s.maxhp)*40,5,xx-((w-spacing)/2),yy-10-(h/2),1,1,green,1);
-            }
+            draw_set_colour(white);            
+
+            if (s.statusImage != -1) {draw_sprite_ext(s.statusImage,s.subImage,xx,yy,2,2,0,green,1);}
+            draw_sprite(spr_squad_hp_bar,0,xx-((w-spacing)/2),yy-10-(h/2));
+            draw_sprite_part_ext(spr_squad_hp_bar,1,0,0,(s.hp/s.maxhp)*40,5,xx-((w-spacing)/2),yy-10-(h/2),1,1,green,1);
         }
     }
     draw_sprite_ext(spr_squad_outline_gui,selected,xx,yy,1,1,0,green,1);
