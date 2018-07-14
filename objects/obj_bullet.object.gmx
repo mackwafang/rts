@@ -29,7 +29,41 @@
 damage = 0;
 isBomb = false;
 bulletLife = 0.3;
-alarm[0] = bulletLife*60;
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="1" enumb="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>if (isBomb) {
+    explosionEffect();
+}
+if (instance_exists(shotFrom)) {
+    if (object_get_parent(shotFrom.object_index) == obj_turret_par) {
+        if (irandom(5) &lt; 1) {
+            var o = instance_create(x,y,obj_explosion_sharpnel);
+            part_type_scale(o.smokeType,5,5);
+            part_type_alpha2(o.smokeType,0.1,0);
+            o.speed = 0;
+        }
+    }
+}
 </string>
           </argument>
         </arguments>
@@ -76,7 +110,6 @@ alarm[0] = bulletLife*60;
           <argument>
             <kind>1</kind>
             <string>image_angle = direction;
-image_xscale = speed;
 
 if (!instance_exists(shotFrom)) {
     instance_destroy();

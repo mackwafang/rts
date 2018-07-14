@@ -31,6 +31,8 @@
     <sprite>sprites\spr_squad_number_small</sprite>
     <sprite>sprites\spr_cooldown_font</sprite>
     <sprite>sprites\spr_land_target</sprite>
+    <sprite>sprites\spr_aa_turret_2</sprite>
+    <sprite>sprites\spr_aa_turret_1</sprite>
   </sprites>
   <backgrounds name="background">
     <background>background\background0</background>
@@ -54,6 +56,7 @@
     <script>scripts\isSquadSelected.gml</script>
     <script>scripts\turnary.gml</script>
     <script>scripts\rectangleCooldown.gml</script>
+    <script>scripts\predictedAim.gml</script>
   </scripts>
   <objects name="objects">
     <object>objects\obj_plane_parent</object>
@@ -66,12 +69,18 @@
     <object>objects\obj_explosion_sharpnel</object>
     <object>objects\obj_runway</object>
     <object>objects\obj_bomb_target</object>
+    <object>objects\obj_turret_par</object>
+    <object>objects\obj_aa_turret_1</object>
+    <object>objects\obj_aa_turret_2</object>
+    <object>objects\obj_shell</object>
   </objects>
   <rooms name="rooms">
     <room>rooms\room0</room>
   </rooms>
-  <constants number="14">
-    <constant name="BASE_PLANE_ARMING_TIME">10</constant>
+  <constants number="16">
+    <constant name="TB_ARMING_TIME">13</constant>
+    <constant name="DB_ARMING_TIME">10</constant>
+    <constant name="FR_ARMING_TIME">9</constant>
     <constant name="MAX_SQUADS">9</constant>
     <constant name="maxView">1600</constant>
     <constant name="minView">256</constant>

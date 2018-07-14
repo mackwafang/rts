@@ -1,6 +1,24 @@
 rts (name TBD) by mackwafang:
 
 Change Log:
+
+ver 0.3.6:
+	- Added squad ready notification
+	- Added AA guns. Guns starts very unaccuracy but gets more accurate as long as it does not change target.
+	- Added AA guns exploding effect
+	- Changed methods of ordering squads
+	  	  	+ Now able to queue coordinates during an engagement
+	- Changed shotdown penalty from 2x of initial arming time to the following:
+	  	  	+ Cooldown increased by the plane type's base arming time multiplied by number of planes shot down
+	- Lowered plane's type base arming time to the following:
+	  	  	+ Fighter: 13 -> 9
+			+ DB: 15 -> 10
+			+ TB: 17 -> 13
+	- Initial arming time is changed to plane's type base arming time multiplies by number of planes in squad
+	- Set base turn rate for all planes to a fixed value
+	- Fighters now aim at target's predicted path
+	- Lower fighter attack from 10 to 2
+
 ver 0.3.5.1:
 	- Added squad type icon
 	- Fighter now matches bomber's speed while in combat

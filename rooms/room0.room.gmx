@@ -3,8 +3,8 @@
   <caption></caption>
   <width>960</width>
   <height>960</height>
-  <vsnap>32</vsnap>
-  <hsnap>32</hsnap>
+  <vsnap>8</vsnap>
+  <hsnap>8</hsnap>
   <isometric>0</isometric>
   <speed>60</speed>
   <persistent>0</persistent>
@@ -52,8 +52,8 @@
   </views>
   <instances>
     <instance objName="obj_control" x="0" y="0" name="inst_A8505E2E" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="obj_runway" x="448" y="224" name="inst_8853F95D" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="obj_runway" x="384" y="736" name="inst_C1CE4ED9" locked="0" code="direction = 90;&#xA;isAlly = false;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="obj_runway" x="384" y="288" name="inst_A225A3F8" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="obj_runway" x="352" y="704" name="inst_855E46C1" locked="0" code="isAlly = false;&#xA;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
   </instances>
   <tiles/>
   <PhysicsWorld>0</PhysicsWorld>

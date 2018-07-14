@@ -42,7 +42,7 @@ turnRateCof = 1; //turn rate coefficient
 fireRate = 7; //fire rate
 maxhp = 60;
 hp = maxhp;
-attack = 10;
+attack = 2;
 bombsDropped = false;
 
 chaseTarget = undefined; //object for go after (object id)
@@ -91,6 +91,7 @@ if (hp &lt; maxhp*0.4) {
 /* dies */
 if (hp &lt;= 0) {
     explosionEffect();
+    assignedSquad.membersShotDown++;
     instance_destroy();
 }
 /* chasing target */
@@ -99,7 +100,7 @@ if ((!takeOff &amp;&amp; !landing)) {
     if (chaseTarget != undefined) {
         if (instance_exists(chaseTarget)) {
             var bomberObjectInRange = collision_line(x,y,x+lengthdir_x(fovRange,image_angle),y+lengthdir_y(fovRange,image_angle),obj_bomb_target,false,false);
-            if (inViewRangeAny(chaseTarget,fovAngle,fovRange) || (bomberObjectInRange != noone)) {
+            if (inViewRangeAny(chaseTarget,fovAngle,fovRange) || (combatRole != 0 &amp;&amp; bomberObjectInRange != noone)) {
                 /* shoot when in range */
                 //if (chaseTarget.object_index != obj_squad) {
                     chaseTimer = 0;
@@ -153,7 +154,8 @@ if ((!takeOff &amp;&amp; !landing)) {
                     }
                 //}
             }
-            turnRate = angle_difference(point_direction(x,y,chaseTarget.x+idling_x,chaseTarget.y+idling_y),direction);
+            var desiredAngle = predictedAim(0,chaseTarget,20,10,10);
+            turnRate = angle_difference(desiredAngle,direction); //engaged direction
             if (isEngaged) {
                 /* plane is engaging */
                 if (distance_to_object(assignedSquad) &lt; assignedSquad.baseEngageRange) {
@@ -182,7 +184,7 @@ if ((!takeOff &amp;&amp; !landing)) {
             else {
                 /* idling around requested location */
                 if (distance_to_object(assignedSquad) &lt; assignedSquad.baseEngageRange/4) {
-                    turnRate = angle_difference(point_direction(x,y,chaseTarget.x,chaseTarget.y)+(90*idleSide),direction);
+                    turnRate = angle_difference(point_direction(x,y,chaseTarget.x+idling_x,chaseTarget.y+idling_y)+(90*idleSide),direction);
                 }
             }
         }
@@ -207,7 +209,7 @@ if ((!takeOff &amp;&amp; !landing)) {
     if (isEngaged) {
         var maxTurnRate = 1.5;
         //if (isEngaged) {minTurnRate = 1;}
-        turnRate = max(-maxTurnRate,min(maxTurnRate,turnRate/50)); // increase turn
+        //turnRate = max(-maxTurnRate,min(maxTurnRate,turnRate/50)); // increase turn
         moveSpeed = baseMoveSpeed;
         if (chaseTarget != undefined) {
             if (instance_exists(chaseTarget)) {
@@ -219,16 +221,17 @@ if ((!takeOff &amp;&amp; !landing)) {
     }
     else {
         turnRate = sign(turnRate);
-        moveSpeed = baseMoveSpeed*0.5;
+        moveSpeed = baseMoveSpeed*0.5;//baseMoveSpeed*0.5;
         chaseTarget = assignedSquad;
     }
     if (fire &lt;= 0) {fire++;}
-    planeImageIndex = clamp(round(-(turnRate*5)+(image_number/2)),0,image_number-2);
+    planeImageIndex = clamp(round(-(turnRate)+(image_number/2)),0,image_number-2);
     speed = var_wipe(speed,moveSpeed,200,0,0.1);
-    direction += turnRate*turnRateCof;
+    direction += sign(turnRate)*turnRateCof;
 }
 else {
     if (takeOff) {
+        if (!instance_exists(takeOffFrom)) {instance_destroy();}
         direction = takeOffFrom.direction;
         speed = var_wipe(speed,5,100,0,0.01);
         planeImageIndex = image_number/2;
