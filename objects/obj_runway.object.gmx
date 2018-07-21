@@ -28,7 +28,6 @@
             <string>isAlly = true; //is runway part of player?
 takeOff = false;
 landing = false;
-isLandInstallation = false; //is runway on land
 isDestroyed = false;
 
 planesRequired = 0; //number of planes required to send out or take in
@@ -37,6 +36,7 @@ useTime = 0; //takeoff/landing time
 sendPlaneToSquad = undefined;
 maxUseTime = 30;
 event_inherited();
+isInstallation = true;
 </string>
           </argument>
         </arguments>
@@ -60,6 +60,7 @@ event_inherited();
           <argument>
             <kind>1</kind>
             <string>ds_queue_destroy(squadQueue);
+instance_destroy(sendPlaneToSquad);
 </string>
           </argument>
         </arguments>
@@ -89,7 +90,6 @@ if (!isDestroyed) {
     if (takeOff) {
         if (useTime &lt; 0) {
             if (planesRequired &gt; 0) {
-                /* send a plane out */
                 var canSend = false;
                 if (isAlly) {
                     if (global.squadDelayTime[sendPlaneToSquad.squadNumber] &lt;= 0) {
@@ -113,10 +113,20 @@ if (!isDestroyed) {
                     print("sending out an aircraft, "+string(planesRequired)+" planes left");
                     planesRequired--;
                     useTime = maxUseTime;
-                    with(sendPlaneToSquad) {
-                        speed += 0.25;
-                        direction = other.image_angle;
+                    if (sendPlaneToSquad.squadSize-planesRequired &lt; 6) {
+                        sendPlaneToSquad.speed = min(sendPlaneToSquad.speed+0.25,6);
                     }
+                    else {
+                        sendPlaneToSquad.speed = max(sendPlaneToSquad.speed-0.25,0);
+                    }
+                    sendPlaneToSquad.direction = image_angle;
+                }
+                else {
+                    ds_queue_enqueue(squadQueue,sendPlaneToSquad);
+                    sendPlaneToSquad = ds_queue_dequeue(squadQueue);
+                    planeType = sendPlaneToSquad.planeType;
+                    planesRequired = sendPlaneToSquad.squadSize;
+                    sendPlaneToSquad.visible = true;
                 }
             }
             else {
@@ -133,7 +143,6 @@ if (!isDestroyed) {
                             }
                         }
                     }
-                    print(planesTakenOff);
                     if (planesTakenOff == sendPlaneToSquad.membersAlive) {allTookOff = true;}
                 } else {allTookOff = true;}
                 if (allTookOff) {

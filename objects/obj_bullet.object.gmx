@@ -28,7 +28,18 @@
             <string>shotFrom = undefined;
 damage = 0;
 isBomb = false;
+isTorp = false;
 bulletLife = 0.3;
+isDestroyed = false;
+
+smokeSystem = part_system_create();
+smokeType = part_type_create();
+
+part_type_sprite(smokeType,spr_particle,false,false,false);
+part_type_alpha2(smokeType,1,0);
+part_type_color1(smokeType,white);
+part_type_orientation(smokeType,0,360,0,0,0);
+part_type_life(smokeType,100,100);
 </string>
           </argument>
         </arguments>
@@ -64,6 +75,31 @@ if (instance_exists(shotFrom)) {
         }
     }
 }
+part_type_destroy(smokeType);
+part_system_destroy(smokeSystem);
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="2" enumb="1">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>instance_destroy();
 </string>
           </argument>
         </arguments>
@@ -86,7 +122,13 @@ if (instance_exists(shotFrom)) {
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>instance_destroy();
+            <string>if (isTorp) {
+    isDestroyed = true;
+    alarm[1] = 100;
+}
+else {
+    instance_destroy();
+}
 </string>
           </argument>
         </arguments>
@@ -110,7 +152,15 @@ if (instance_exists(shotFrom)) {
           <argument>
             <kind>1</kind>
             <string>image_angle = direction;
-
+if (isTorp &amp;&amp; !isDestroyed) {
+    part_particles_create(smokeSystem,x,y,smokeType,1);
+}
+else if (isDestroyed) {
+    visible = false;
+    mask_index = -1;
+    speed = 0;
+    alarm[0] = -1;
+}
 if (!instance_exists(shotFrom)) {
     instance_destroy();
 }

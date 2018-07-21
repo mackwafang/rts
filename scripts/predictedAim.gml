@@ -8,11 +8,11 @@ var target = argument[1];
 var spd = argument[2];
 var randomX = 0;
 var randomY = 0;
-if (argument_count == 4) {
+if (argument_count >= 4) {
     randomX = irandom_range(-argument[3],argument[3]);
-}
-if (argument_count == 5) {
-    randomY = irandom_range(-argument[4],argument[4]);
+    if (argument_count == 5) {
+        randomY = irandom_range(-argument[4],argument[4]);
+    }
 }
 
 var targetStartX = lerp(target.x,target.x+hspeed,-room_speed);

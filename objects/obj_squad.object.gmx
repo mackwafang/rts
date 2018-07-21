@@ -92,16 +92,22 @@ alarm[0] = 1;
 if (isAlly) {
     global.squad[squadNumber] = noone;
     //global.squadDelayTime[squadNumber] = global.squadInitDelayTime[squadNumber];
-    var time = 0;
-    switch(planeType) {
-        case 1:
-            time = FR_ARMING_TIME;
-            break;
-        case 2:
-            time = DB_ARMING_TIME;
-            break;
+    global.squadDelayTime[squadNumber] = global.squadInitDelayTime[squadNumber];
+    if (membersShotDown &gt; 0) {
+        var time = 0;
+        switch(planeType) {
+            case 1:
+                time = FR_ARMING_TIME;
+                break;
+            case 2:
+                time = DB_ARMING_TIME;
+                break;
+            case 3:
+                time = TB_ARMING_TIME;
+                break;
+        }
+        global.squadDelayTime[squadNumber] += round(time*membersShotDown)*60;
     }
-    global.squadDelayTime[squadNumber] += round(time*membersShotDown)*60;
 }
 ds_list_destroy(coordinate_queue);
 </string>
@@ -190,23 +196,25 @@ if (!planesTakingOff) {
                 var enemy = instance_find(obj_squad,i);
                 if (engageRange+enemy.engageRange &gt;= distance_to_object(enemy)) {
                     if (isAlly != enemy.isAlly) {
-                        alarm[0] = 300;
-                        if (!isEngaged) {
-                            isEngaged = true;
-                            engageSquad = enemy;
-                            assignEnemy(enemy);
-                        }
-                        else {
-                            //enemy.x = var_wipe(enemy.x,x,100,0,1);
-                            //enemy.y = var_wipe(enemy.y,y,100,0,1);
-                            if (engageSquad != undefined) {
-                                direction += sign(angle_difference(point_direction(x,y,engageSquad.x,engageSquad.y),direction));
-                                if (distance_to_object(engageSquad) &gt; 64) {
-                                    speed = var_wipe(speed,1,100,0,0.5);
-                                    //print(string(id)+" moving towards "+string(engageSquad));
-                                }
-                                else {
-                                    speed = 0;
+                        if (!enemy.planesTakingOff) {
+                            alarm[0] = 300;
+                            if (!isEngaged) {
+                                isEngaged = true;
+                                engageSquad = enemy;
+                                assignEnemy(enemy);
+                            }
+                            else {
+                                //enemy.x = var_wipe(enemy.x,x,100,0,1);
+                                //enemy.y = var_wipe(enemy.y,y,100,0,1);
+                                if (engageSquad != undefined) {
+                                    direction += sign(angle_difference(point_direction(x,y,engageSquad.x,engageSquad.y),direction));
+                                    if (distance_to_object(engageSquad) &gt; 64) {
+                                        speed = var_wipe(speed,1,100,0,0.5);
+                                        //print(string(id)+" moving towards "+string(engageSquad));
+                                    }
+                                    else {
+                                        speed = 0;
+                                    }
                                 }
                             }
                         }
@@ -230,10 +238,11 @@ if (!planesTakingOff) {
             }
         }
         else {
-            angle = angle_difference(point_direction(x,y,dest_x,dest_y)+90,direction);
+            angle = angle_difference(point_direction(x,y,dest_x,dest_y),direction);
             for (var i = 0; i &lt; squadSize; i++) {
                 if (instance_exists(squadMember[i])) {
                     squadMember[i].chaseTarget = escortSquad;
+                    squadMember[i].isEngaged = true;
                 }
             }
         }
@@ -245,8 +254,9 @@ if (!planesTakingOff) {
     else {
         /* squad is not engaging */
         engageRange = baseEngageRange;
+        speed = var_wipe(speed,2*speedMultiplier,100,0,0.2);
         /* moving towards destination*/
-        if (distToDest &lt; 96) {
+        if (distToDest &lt; 128) {
             /* squad idling */
             angle = angle_difference(point_direction(x,y,dest_x,dest_y),direction);
             if (ds_list_size(coordinate_queue) &lt; 4) {
@@ -268,38 +278,37 @@ if (!planesTakingOff) {
                             }
                         }
                     }
+                    speed = var_wipe(speed,1*speedMultiplier,100,0,0.2);
                 }
             }
-            speed = var_wipe(speed,1,100,0,0.2);
         }
         else {
             /* squad moving towards waypoint */
-            angle = angle_difference(point_direction(x,y,dest_x,dest_y),direction)*2;
-            speed = var_wipe(speed,1.5*speedMultiplier,100,0,0.2);
+            angle = angle_difference(point_direction(x,y,dest_x,dest_y),direction);
         }
-    }
-    direction += sign(angle);
-    if (escortSquad == undefined) {
-        if (distToDest &lt; 64) {
-            if (planesLanding) {
-                /* for planes to land */
-                for (var i = 0; i &lt; squadSize; i++) {
-                    if (instance_exists(squadMember[i])) {
-                        squadMember[i].landing = true;
+        if (escortSquad == undefined) {
+            if (distToDest &lt; 64) {
+                if (planesLanding) {
+                    /* for planes to land */
+                    for (var i = 0; i &lt; squadSize; i++) {
+                        if (instance_exists(squadMember[i])) {
+                            squadMember[i].landing = true;
+                        }
+                    }
+                }
+                if (distToDest &lt; 32) {
+                    if (ds_list_size(coordinate_queue) &gt;= 2) {
+                        dest_x = ds_list_find_value(coordinate_queue,0);
+                        dest_y = ds_list_find_value(coordinate_queue,1);
+                        /* destination reached, removed current destination*/
+                        ds_list_delete(coordinate_queue,0);
+                        ds_list_delete(coordinate_queue,0);
                     }
                 }
             }
-            if (distToDest &lt; 32) {
-                if (ds_list_size(coordinate_queue) &gt;= 2) {
-                    dest_x = ds_list_find_value(coordinate_queue,0);
-                    dest_y = ds_list_find_value(coordinate_queue,1);
-                    /* destination reached, removed current destination*/
-                    ds_list_delete(coordinate_queue,0);
-                    ds_list_delete(coordinate_queue,0);
-                }
-            }
         }
     }
+    direction += sign(angle)*2;
     /* destroy squad when all memeber is destroyed */
     if (membersDestroyed == squadSize) {
         instance_destroy();
@@ -336,29 +345,31 @@ if (!ai_control &amp;&amp; isAlly) {
                 for (var i = 0; i &lt; instance_count; i++) {
                     var obj = instance_id[i];
                     if (obj != undefined) {
-                        if (inSquare(mouse_x,mouse_y,obj.x-clickRange,obj.y-clickRange,obj.x+clickRange,obj.y+clickRange)) {
-                            ds_list_clear(coordinate_queue);
-                            switch(obj.object_index) {
-                                case obj_squad:
-                                    if ((obj.isAlly == isAlly) || combatRole == 0) {
-                                        escortSquad = obj;
-                                    }
-                                    break;
-                                case obj_runway:
-                                    if (object_get_parent(obj.object_index) == obj_bomb_target) {
-                                        if (combatRole != 0 &amp;&amp; obj.isAlly != isAlly) {
+                        if (instance_exists(obj)) {
+                            if (inSquare(mouse_x,mouse_y,obj.x-clickRange,obj.y-clickRange,obj.x+clickRange,obj.y+clickRange)) {
+                                ds_list_clear(coordinate_queue);
+                                switch(obj.object_index) {
+                                    case obj_squad:
+                                        if ((obj.isAlly == isAlly) || combatRole == 0) {
                                             escortSquad = obj;
-                                            engageSquad = obj;
                                         }
-                                    }
-                                    break;
+                                        break;
+                                    case obj_runway:
+                                        if (object_get_parent(obj.object_index) == obj_bomb_target) {
+                                            if (combatRole != 0 &amp;&amp; obj.isAlly != isAlly) {
+                                                escortSquad = obj;
+                                                engageSquad = obj;
+                                            }
+                                        }
+                                        break;
+                                }
+                                break;
                             }
-                            break;
-                        }
-                        else {
-                            escortSquad = undefined;
-                            if (combatRole != 0) {
-                                engageSquad = undefined;
+                            else {
+                                escortSquad = undefined;
+                                if (combatRole != 0) {
+                                    engageSquad = undefined;
+                                }
                             }
                         }
                     }
@@ -458,7 +469,14 @@ else if (planesLanding) {
     statusImage = spr_squad_landing;
 }
 else if (isEngaged) {
-    statusImage = spr_squad_engaging;
+    switch(combatRole) {
+        case 0:
+            statusImage = spr_squad_engaging_fighter;
+            break;
+        case 1: case 2:
+            statusImage = spr_squad_engaging_bomber;
+            break;
+    }
 }
 else if (escortSquad != undefined) {
     if (instance_exists(escortSquad)) {
@@ -496,8 +514,7 @@ for (var i = 0; i &lt; squadSize; i++) {
         maxhp = squadMember[i].maxhp*squadSize;
     }
 }
-//draw_text_colour((x-view_xview[0])*windowRatio_x,((y-view_yview[0])*windowRatio_y)-20,string(membersAlive)+"/"+string(squadSize),colour,colour,colour,colour,1);
-draw_text_colour((x-view_xview[0])*windowRatio_x,((y-view_yview[0])*windowRatio_y)-20,membersShotDown,colour,colour,colour,colour,1);
+draw_text_colour((x-view_xview[0])*windowRatio_x,((y-view_yview[0])*windowRatio_y)-20,string(membersAlive)+"/"+string(squadSize),colour,colour,colour,colour,1);
 draw_sprite(spr_squad_hp_bar,0,((x-view_xview[0])*windowRatio_x)-20,((y-view_yview[0])*windowRatio_y)-18);
 draw_sprite_part_ext(spr_squad_hp_bar,1,0,0,(hp/maxhp)*40,5,((x-view_xview[0])*windowRatio_x)-20,((y-view_yview[0])*windowRatio_y)-18,1,1,colour,1);
 //draw_circle_colour(x,y,engageRange,colour,colour,true);

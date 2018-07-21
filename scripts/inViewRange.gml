@@ -1,16 +1,20 @@
-///inViewRange(target,angle,range,[from]);
+///inViewRange(target,angle,range,[from],[inverse]);
 var target = argument[0];
 var angle = argument[1];
 var range = argument[2];
 var from = self;
-if (argument_count == 4) {
+var inverse = false;
+if (argument_count > 3) {
     from = argument[3];
+    if (argument_count == 5) {
+        inverse = argument[4];
+    }
 }
 if (instance_exists(target) && instance_exists(from)) {
+    /* Vector from to target */
     if (point_distance(target.x,target.y,from.x,from.y) <= range) {
-        /* Vector from to target */
-        var x1 = target.x-from.x;
-        var y1 = target.y-from.y;
+        var x1 = turnary(inverse,from.x-target.x,target.x-from.x);
+        var y1 = turnary(inverse,from.y-target.y,target.y-from.y);
         /* "Normal" vector of target */
         var x2 = lengthdir_x(1,from.direction);
         var y2 = lengthdir_y(1,from.direction);

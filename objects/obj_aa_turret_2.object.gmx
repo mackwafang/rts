@@ -34,7 +34,7 @@ gunOffset[0] = 10;
 gunOffset[1] = -3;
 gunOffset[2] = 10;
 gunOffset[3] = 3;
-attack = 10;
+attack = 1;
 isAA = true;
 hp = 1;
 </string>

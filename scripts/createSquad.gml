@@ -25,9 +25,15 @@ switch(planeType) {
     case obj_ally_plane: case obj_enemy_plane:
         s.combatRole = 0;
         break;
+    case obj_ally_torp_bomber:
+        s.combatRole = 1;
+        s.speedMultiplier = 0.75;
+        s.baseEngageRange *= 2;
+        s.canEngage = false;
+        break;
     case obj_ally_bomber:
         s.combatRole = 2;
-        s.speedMultiplier = 0.7;
+        s.speedMultiplier = 0.8;
         s.canEngage = false;
         break;
 }

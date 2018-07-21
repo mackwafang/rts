@@ -2,18 +2,35 @@ rts (name TBD) by mackwafang:
 
 Change Log:
 
+ver 0.3.6.2:
+	- Torpedo bomber combat mechanic implemented
+	- Fighter's max HP reduced from 60 to 50
+	- Planes now matches squad icon's speed and direction while close
+	- Squad icon base speed increases from 1.5 to 2
+	- Added self-defense fire for bomber
+	- Fixed a bug where a squad's planes would move outside the play area when the squad's target is not airborne
+	- Bomber's HP reduced from 150 to 75
+	- Restructure some codes to make them more readable
+
+ver 0.3.6.1:
+	- Lowered squad initial arming time by half
+	- Changes shot down penalty:
+		+ If no planes were shot down, arming time is set to initial arming time
+	- Fixed a bug happens when no squad is able to take off when squad next in queue in arming
+	- Fighter and bomber now have its own engagement icon
+
 ver 0.3.6:
 	- Added squad ready notification
 	- Added AA guns. Guns starts very unaccuracy but gets more accurate as long as it does not change target.
 	- Added AA guns exploding effect
 	- Changed methods of ordering squads
-	  	  	+ Now able to queue coordinates during an engagement
+		+ Now able to queue coordinates during an engagement
 	- Changed shotdown penalty from 2x of initial arming time to the following:
-	  	  	+ Cooldown increased by the plane type's base arming time multiplied by number of planes shot down
+		+ Cooldown increased by the plane type's base arming time multiplied by number of planes shot down
 	- Lowered plane's type base arming time to the following:
-	  	  	+ Fighter: 13 -> 9
-			+ DB: 15 -> 10
-			+ TB: 17 -> 13
+		+ Fighter: 13 -> 9
+		+ DB: 15 -> 10
+		+ TB: 17 -> 13
 	- Initial arming time is changed to plane's type base arming time multiplies by number of planes in squad
 	- Set base turn rate for all planes to a fixed value
 	- Fighters now aim at target's predicted path
@@ -63,8 +80,8 @@ ver 0.3.2:
 	
 ver 0.3.1.3:
 	- Added squad ammunition
-			+ 120 "ammo" per planes in squad
-			+ Each bullet fired from 1 plane reduce reserve by 1
+		+ 120 "ammo" per planes in squad
+		+ Each bullet fired from 1 plane reduce reserve by 1
 		
 ver 0.3.1:
 	- Changes to squad creation (temporary):

@@ -5,11 +5,11 @@ var spd = argument[2];
 var dir = argument[3];
 var damage = 1;
 var time = 0.3;
-if (argument_count == 5) {
+if (argument_count > 4) {
     damage = argument[4];
-}
-if (argument_count == 6) {
-    time = argument[5];
+    if (argument_count == 6) {
+        time = argument[5];
+    }
 }
 
 //audio_play_sound(snd_gun,1,false);

@@ -83,6 +83,7 @@ instance_destroy();
           <argument>
             <kind>1</kind>
             <string>if (alarm[0] &gt; 100) {part_particles_create(smokeSystem,x,y,smokeType,1);}
+
 </string>
           </argument>
         </arguments>

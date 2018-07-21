@@ -32,7 +32,7 @@ isAlly = true;
 fire = 0;
 attack = 1; //attack against enemy
 defence = 1; //defence against enemy
-accuracy = 0; //lower = more accurate
+accuracy = 10; //lower = more accurate
 hp = 1; //durability 
 maxRepairTime = 300; //time until turret is usable
 isAA = false;
@@ -162,7 +162,7 @@ if (target != noone) {
                 if (fire &gt;= 0 &amp;&amp; reloadTime &lt;= 0) {
                     fire -= fireRate;
                     reloadTime = maxReloadTime;
-                    //if (accuracy &gt; 2) {accuracy--;}
+                    if (accuracy &gt; 2) {accuracy--;}
                     for (var i = 0; i &lt; numberOfGuns; i++) {
                         var x_to = gunOffset[i*2];
                         var y_to = gunOffset[(i*2)+1];
@@ -181,7 +181,7 @@ if (target != noone) {
             }
         }
         else {
-            accuracy = 0;
+            accuracy = 10;
         }
     }
 }

@@ -1,4 +1,4 @@
-///inViewRangeAny(target,angle,range,[from]);
+///inViewRangeAny(target,angle,range,[from],[inverse]);
 /*
     check if any <target> object is in view range
     return:
@@ -8,16 +8,20 @@ var target = argument[0];
 var angle = argument[1];
 var range = argument[2];
 var from = self;
-if (argument_count == 4) {
+var inverse = false;
+if (argument_count > 3) {
     from = argument[3];
+    if (argument_count == 5) {
+        inverse = argument[4];
+    }
 }
 if ((instance_number(target) > 0) && instance_exists(from)) {
     for (var i = 0; i < instance_number(target.object_index); i++) {
         var o = instance_find(target.object_index,i);
         if (point_distance(o.x,o.y,from.x,from.y) <= range) {
             /* Vector from to o */
-            var x1 = o.x-from.x;
-            var y1 = o.y-from.y;
+            var x1 = turnary(inverse,from.x-o.x,o.x-from.x);
+            var y1 = turnary(inverse,from.y-o.y,o.y-from.y);
             /* "Normal" vector of o */
             var x2 = lengthdir_x(1,from.direction);
             var y2 = lengthdir_y(1,from.direction);

@@ -30,6 +30,7 @@ hp = maxhp;
 displayhp = hp;
 child = -1;
 isDestroyed = false;
+isInstallation = false;
 </string>
           </argument>
         </arguments>
@@ -86,6 +87,15 @@ if ((child = object_get_parent(obj_bomb_target)) != -1) {
         if (!isDestroyed) {
             hp -= other.damage;
             instance_destroy(other);
+        }
+    }
+}
+if (isInstallation) {
+    if (other.isTorp) {
+        if (!isDestroyed &amp;&amp; !other.isDestroyed) {
+            hp -= other.damage;
+            explosionEffect(other,white);
+            other.isDestroyed = true;
         }
     }
 }

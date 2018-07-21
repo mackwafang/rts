@@ -16,6 +16,8 @@
     <sprite>sprites\spr_squad_take_off</sprite>
     <sprite>sprites\spr_squad_ready</sprite>
     <sprite>sprites\spr_squad_engaging</sprite>
+    <sprite>sprites\spr_squad_engaging_fighter</sprite>
+    <sprite>sprites\spr_squad_engaging_bomber</sprite>
     <sprite>sprites\spr_squad_escort</sprite>
     <sprite>sprites\spr_target_icon</sprite>
     <sprite>sprites\spr_bullet</sprite>
@@ -33,6 +35,7 @@
     <sprite>sprites\spr_land_target</sprite>
     <sprite>sprites\spr_aa_turret_2</sprite>
     <sprite>sprites\spr_aa_turret_1</sprite>
+    <sprite>sprites\spr_damage_font</sprite>
   </sprites>
   <backgrounds name="background">
     <background>background\background0</background>
@@ -48,6 +51,7 @@
     <script>scripts\createPlane.gml</script>
     <script>scripts\shootBullet.gml</script>
     <script>scripts\dropBomb.gml</script>
+    <script>scripts\dropTorpedo.gml</script>
     <script>scripts\fireParticleInit.gml</script>
     <script>scripts\explosionEffect.gml</script>
     <script>scripts\assignEnemy.gml</script>
@@ -57,11 +61,13 @@
     <script>scripts\turnary.gml</script>
     <script>scripts\rectangleCooldown.gml</script>
     <script>scripts\predictedAim.gml</script>
+    <script>scripts\leadingZero.gml</script>
   </scripts>
   <objects name="objects">
     <object>objects\obj_plane_parent</object>
     <object>objects\obj_ally_plane</object>
     <object>objects\obj_ally_bomber</object>
+    <object>objects\obj_ally_torp_bomber</object>
     <object>objects\obj_enemy_plane</object>
     <object>objects\obj_squad</object>
     <object>objects\obj_bullet</object>
@@ -73,6 +79,7 @@
     <object>objects\obj_aa_turret_1</object>
     <object>objects\obj_aa_turret_2</object>
     <object>objects\obj_shell</object>
+    <object>objects\obj_damage_ind</object>
   </objects>
   <rooms name="rooms">
     <room>rooms\room0</room>

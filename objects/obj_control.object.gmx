@@ -31,17 +31,16 @@ global.mapView = false;
 global.squadType[0] = 1;
 global.squadType[1] = 1;
 global.squadType[2] = 1;
-global.squadType[3] = 2;
-global.squadType[4] = 2;
-global.squadType[5] = 2;
+global.squadType[3] = 3;
+global.squadType[4] = 3;
+global.squadType[5] = 3;
 global.squadType[6] = 2;
 global.squadType[7] = 2;
 global.squadType[8] = 2;
-global.squadType[9] = 2;
 global.FF_size = 6;
-global.TB_size = 4;
+global.TB_size = 6;
 global.DB_size = 6;
-for (var i = 0; i &lt;= MAX_SQUADS; i++) {
+for (var i = 0; i &lt; MAX_SQUADS; i++) {
     global.squad[i] = noone;
     var time = 0;
     var size = 0;
@@ -54,15 +53,19 @@ for (var i = 0; i &lt;= MAX_SQUADS; i++) {
             time = DB_ARMING_TIME;
             size = global.DB_size;
             break;
+        case 3:
+            time = TB_ARMING_TIME;
+            size = global.TB_size;
+            break;
     }
-    global.squadInitDelayTime[i] = 60*(time*size);
+    global.squadInitDelayTime[i] = 30*(time*size);
     global.squadDelayTime[i] = global.squadInitDelayTime[i];
 }
 global.squadsInCommand = MAX_SQUADS;
 global.selectedSquad = 0;
 global.mouseOnObject = noone;
 
-cooldownFont = font_add_sprite_ext(spr_cooldown_font,"0123456789.",false,-7);
+cooldownFont = font_add_sprite_ext(spr_cooldown_font,"0123456789.:",false,-7);
 global.gameFont = font_add_sprite(spr_squad_font,ord("!"),true,1);
 squadFont = font_add_sprite(spr_squad_font,ord("!"),true,1);
 display_set_gui_size(view_wport[0],view_hport[0]);
@@ -116,7 +119,18 @@ if (global.selectedSquad &gt;= 0) {
         for (var i = 0; i &lt; MAX_SQUADS; i++) {
             if (isSquadSelected(i)) {
                 if (global.squad[i] == noone) {
-                    createSquad(mouse_x,mouse_y,i,6,global.squadType[i],true,100001);
+                    var size = 0;
+                    switch(global.squadType[i]) {
+                        case 1:
+                            size = global.FF_size;
+                            break;
+                        case 2:
+                            size = global.DB_size;
+                            break;
+                        case 3:
+                            size = global.TB_size;
+                    }
+                    createSquad(mouse_x,mouse_y,i,size,global.squadType[i],true,100001);
                 }
             }
         }
@@ -224,27 +238,32 @@ for (var i = 0; i &lt; global.squadsInCommand; i++) {
         draw_set_valign(fa_middle);
         draw_set_halign(fa_center);
         draw_set_font(cooldownFont);
-        var v = string(global.squadDelayTime[i] div 60);
-        if (global.squadDelayTime[i] &lt;= 600) {
-            v = string_format(global.squadDelayTime[i]/60,1,1);
+        if ((global.squadDelayTime[i] div 3600) == 0) {
+            var v = string(global.squadDelayTime[i] div 60);
+            if (global.squadDelayTime[i] &lt;= 600) {
+                v = string_format(global.squadDelayTime[i]/60,1,1);
+            }
+        }
+        else {
+            v = string(global.squadDelayTime[i] div 3600)+":"+leadingZero(2,(global.squadDelayTime[i] div 60) mod 60);
         }
         rectangleCooldown(xx-(w-spacing)/2,yy-(h-spacing)/2,xx+(w-spacing)/2,yy+(h-spacing)/2,global.squadDelayTime[i],global.squadInitDelayTime[i],0,0.5);
         draw_text(xx-4,yy,v);
     }
     else {
         if (s != noone) {
-            draw_sprite(spr_ammo,(2*s.combatRole),xx-((w-spacing)/2),yy-5-(h/2));
-            draw_sprite_part_ext(spr_ammo,(2*s.combatRole)+1,0,0,(ceil(s.ammo/round(s.maxAmmo/8)))*5,10,xx-((w-spacing)/2),yy-5-(h/2),1,1,green,1);
+            draw_sprite(spr_ammo,(2*s.combatRole),xx-((w-spacing)/2),yy-7-(h/2));
+            draw_sprite_part_ext(spr_ammo,(2*s.combatRole)+1,0,0,(ceil(s.ammo/round(s.maxAmmo/8)))*5,10,xx-((w-spacing)/2),yy-7-(h/2),1,1,green,1);
             draw_set_valign(fa_bottom);
             draw_set_halign(fa_center);
             draw_set_font(squadFont);
             draw_set_colour(green);
-            draw_text(xx,yy-10-(h/2),string(s.membersAlive)+"/"+string(s.squadSize));
+            draw_text(xx,yy-12-(h/2),string(s.membersAlive)+"/"+string(s.squadSize));
             draw_set_colour(white);            
 
             if (s.statusImage != -1) {draw_sprite_ext(s.statusImage,s.subImage,xx,yy,2,2,0,green,1);}
-            draw_sprite(spr_squad_hp_bar,0,xx-((w-spacing)/2),yy-10-(h/2));
-            draw_sprite_part_ext(spr_squad_hp_bar,1,0,0,(s.hp/s.maxhp)*40,5,xx-((w-spacing)/2),yy-10-(h/2),1,1,green,1);
+            draw_sprite(spr_squad_hp_bar,0,xx-((w-spacing)/2),yy-12-(h/2));
+            draw_sprite_part_ext(spr_squad_hp_bar,1,0,0,(s.hp/s.maxhp)*40,5,xx-((w-spacing)/2),yy-12-(h/2),1,1,green,1);
         }
         else {
             draw_sprite(spr_squad_ready,abs(global.squadDelayTime[i]),xx,yy-(h/2));
