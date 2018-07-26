@@ -48,7 +48,7 @@ s.ammo = s.maxAmmo;
 
 if (takeOffFrom == noone) {
     for (var i = 0; i < squadSize; i++) {
-        s.squadMember[i] = createPlane(s.x,s.y,irandom(360),planeType,s,isAlly,noone);
+        s.squadMember[i] = createPlane(s.x,s.y,irandom(360),planeType,s,isAlly,noone,i);
     }
     s.visible = true;
 }

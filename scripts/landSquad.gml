@@ -11,7 +11,7 @@ if (!planesTakingOff || !planesLanding) {
             ds_list_add(coordinate_queue,xx,yy);
             ds_list_add(coordinate_queue,takeOffFrom.x,takeOffFrom.y);
             landingQueued = true;
-            escortSquad = undefined;
+            escortSquad = noone;
         }
     }
     else {

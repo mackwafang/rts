@@ -60,7 +60,9 @@ isInstallation = true;
           <argument>
             <kind>1</kind>
             <string>ds_queue_destroy(squadQueue);
-instance_destroy(sendPlaneToSquad);
+if (sendPlaneToSquad != undefined) {
+    instance_destroy(sendPlaneToSquad);
+}
 </string>
           </argument>
         </arguments>
@@ -100,13 +102,11 @@ if (!isDestroyed) {
                     canSend = true;
                 }
                 if (canSend) {
-                    sendPlaneToSquad.squadMember[sendPlaneToSquad.squadSize-planesRequired] = createPlane(x,y,direction,sendPlaneToSquad.planeType,sendPlaneToSquad,sendPlaneToSquad.isAlly,id);
+                    sendPlaneToSquad.squadMember[sendPlaneToSquad.squadSize-planesRequired] = createPlane(x,y,direction,sendPlaneToSquad.planeType,sendPlaneToSquad,sendPlaneToSquad.isAlly,id,sendPlaneToSquad.squadSize-planesRequired);
                     with(sendPlaneToSquad) {
                         if (isEngaged) {
-                            if (engageSquad != undefined) {
-                                if (instance_exists(engageSquad)) {
-                                    assignEnemy(engageSquad);
-                                }
+                            if (instance_exists(engageSquad)) {
+                                assignEnemy(engageSquad);
                             }
                         }
                     }

@@ -36,6 +36,7 @@ idling_y = irandom_range(-4,4)*16; //use when plane is idling/moving towards way
 takeOffFrom = noone;
 
 baseMoveSpeed = 4;
+planeId = -1;
 moveSpeed = 4;
 combatRole = 0; //role of plane, 0 = fighter, 1 = torp. bomber, 2 = dive bomber
 turnRateCof = 1; //turn rate coefficient
@@ -46,13 +47,11 @@ attack = 2;
 damage = 0;
 bombsDropped = false;
 
-chaseTarget = undefined; //object for go after (object id)
-assignedSquad = undefined; //the assigned squad (object id)
+chaseTarget = noone; //object for go after (object id)
+assignedSquad = noone; //the assigned squad (object id)
+engageSquad = noone; // the squad that is engaged
 isEngaged = false; //is plane engaged in combat
-engagedSquad = undefined; // the squad that is engaged
 maxEngageRange = 256; // must engage within this range
-chaseTimer = 0;
-maxChaseTimer = 3*60;
 
 fovRange = 256;
 fovAngle = 10;
@@ -94,162 +93,159 @@ if (hp &lt;= 0) {
     explosionEffect();
     if (combatRole != 0) {assignedSquad.ammo -= assignedSquad.maxAmmo/assignedSquad.squadSize;}
     assignedSquad.membersShotDown++;
+    for (var i = planeId; i &lt; assignedSquad.membersAlive-1; i++) {
+        assignedSquad.squadMember[i] = assignedSquad.squadMember[i+1];
+        assignedSquad.squadMember[i].planeId = i;//assignedSquad.squadMember[i+1].planeId;
+    }
+    assignedSquad.squadMember[assignedSquad.membersAlive-1] = noone;
     instance_destroy();
 }
 /* chasing target */
+if (assignedSquad == noone) {instance_destroy();}
 var turnRate = 0;
 if ((!takeOff &amp;&amp; !landing)) {
     var withinSquadRange = false; //used for adjusting speed of plane when it's near squad icon
+    var addTurnRate = 1;
     if (isEngaged) {
-        if (chaseTarget != undefined) {
-            if (instance_exists(chaseTarget)) {
-                var bomberObjectInRange = collision_line(x,y,x+lengthdir_x(fovRange,image_angle),y+lengthdir_y(fovRange,image_angle),obj_bomb_target,false,false);
-                if (combatRole != 0) {
-                    if (inViewRangeAny(obj_enemy_plane,15,fovRange,self,true)) {
-                        /* Bomber self-defense combat */
-                        if (fire &gt; 0) {
-                            fire -= fireRate;
-                            var nearest = instance_nearest(x,y,obj_enemy_plane);
-                            if (nearest != noone) {
-                                shootBullet(x,y,10,point_direction(x,y,nearest.x,nearest.y),1);
-                            }
+        if (instance_exists(chaseTarget)) {
+            var bomberObjectInRange = collision_line(x,y,x+lengthdir_x(fovRange,image_angle),y+lengthdir_y(fovRange,image_angle),obj_bomb_target,false,false);
+            if (combatRole != 0) {
+                if (inViewRangeAny(obj_enemy_plane,15,fovRange,self,true)) {
+                    /* Bomber self-defense combat */
+                    if (fire &gt; 0) {
+                        fire -= fireRate;
+                        var nearest = instance_nearest(x,y,obj_enemy_plane);
+                        if (nearest != noone) {
+                            shootBullet(x,y,10,point_direction(x,y,nearest.x,nearest.y),1);
                         }
                     }
                 }
-                if (inViewRangeAny(chaseTarget,fovAngle,fovRange) || (combatRole != 0 &amp;&amp; bomberObjectInRange != noone)) {
-                    /* shoot when in range */
-                    //if (chaseTarget.object_index != obj_squad) {
-                        chaseTimer = 0;
-                        if (assignedSquad.ammo &gt; 0) {
-                            switch(combatRole) {
-                                case 0:
-                                    /* Air v Air combat */
-                                    if (chaseTarget != assignedSquad) {
-                                        if (fire &gt; 0) {
-                                            fire -= fireRate;
-                                            assignedSquad.ammo -= 1;
-                                            var dist = point_distance(x,y,x,y+6);
-                                            var dir = image_angle+point_direction(x,y,x,y+6);
-                                            shootBullet(x+lengthdir_x(dist,dir),y+lengthdir_y(dist,dir),20,direction,attack);
-                                            
-                                            var dist = point_distance(x,y,x,y-6);
-                                            var dir = image_angle+point_direction(x,y,x,y-6);
-                                            shootBullet(x+lengthdir_x(dist,dir),y+lengthdir_y(dist,dir),20,direction,attack);
-                                        }
+            }
+            if (inViewRangeAny(chaseTarget,fovAngle,fovRange) || (combatRole != 0 &amp;&amp; bomberObjectInRange != noone)) {
+                /* shoot when in range */
+                //if (chaseTarget.object_index != obj_squad) {
+                    chaseTimer = 0;
+                    if (assignedSquad.ammo &gt; 0) {
+                        switch(combatRole) {
+                            case 0:
+                                /* Air v Air combat */
+                                if (chaseTarget != assignedSquad) {
+                                    if (fire &gt; 0) {
+                                        fire -= fireRate;
+                                        assignedSquad.ammo -= 1;
+                                        var dist = point_distance(x,y,x,y+6);
+                                        var dir = image_angle+point_direction(x,y,x,y+6);
+                                        shootBullet(x+lengthdir_x(dist,dir),y+lengthdir_y(dist,dir),20,direction,attack);
+                                        
+                                        var dist = point_distance(x,y,x,y-6);
+                                        var dir = image_angle+point_direction(x,y,x,y-6);
+                                        shootBullet(x+lengthdir_x(dist,dir),y+lengthdir_y(dist,dir),20,direction,attack);
                                     }
-                                    break;
-                                case 1: case 2:
-                                    /* Air v Ground (torpedo bomber) combat */
-                                    if (chaseTarget.isAlly != isAlly)  {
-                                        if (object_get_parent(chaseTarget.object_index) == obj_bomb_target) {
-                                            if (!bombsDropped) {
-                                                bombsDropped = true;
-                                                assignedSquad.ammo -= assignedSquad.maxAmmo/assignedSquad.squadSize;
-                                                if (combatRole == 1) { 
-                                                    dropTorpedo(x,y,1,image_angle,attack,20);
-                                                }
-                                                else {
-                                                    dropBomb(x,y,1,image_angle,attack,0.6);
-                                                }
-                                                chaseTarget = assignedSquad;
-                                                isEngaged = false;
+                                }
+                                break;
+                            case 1: case 2:
+                                /* Air v Ground (torpedo bomber) combat */
+                                if (chaseTarget.isAlly != isAlly)  {
+                                    if (object_get_parent(chaseTarget.object_index) == obj_bomb_target) {
+                                        if (!bombsDropped) {
+                                            bombsDropped = true;
+                                            assignedSquad.ammo -= assignedSquad.maxAmmo/assignedSquad.squadSize;
+                                            if (combatRole == 1) { 
+                                                dropTorpedo(x,y,1,image_angle,attack,20);
                                             }
+                                            else {
+                                                dropBomb(x,y,1,image_angle,attack,0.6);
+                                            }
+                                            chaseTarget = assignedSquad;
+                                            isEngaged = false;
                                         }
                                     }
-                                    break;
-                            }
-                        }
-                        else {
-                            /* no ammunition left, cannot engage */
-                            ds_list_clear(assignedSquad.coordinate_queue);
-                            engagedSquad = undefined;
-                            chaseTarget = assignedSquad;
-                            isEngaged = false;
-                            chaseTimer = 0;
-                            assignedSquad.canEngage = false;
-                            assignedSquad.isEngaged = false;
-                            assignedSquad.planesLanding = true;
-                            with(assignedSquad) {
-                                landSquad();
-                            }
-                            /*assignedSquad.dest_x = takeOffFrom.x+lengthdir_x(-256,takeOffFrom.direction);
-                            assignedSquad.dest_y = takeOffFrom.y+lengthdir_y(-256,takeOffFrom.direction);*/
-                        }
-                    //}
-                }
-                var desiredAngle = predictedAim(direction,chaseTarget,20);
-                turnRate = angle_difference(desiredAngle,direction); //engaged direction
-                /* plane is engaging */
-                if (combatRole == 0) {
-                    if (distance_to_object(assignedSquad) &lt; assignedSquad.baseEngageRange) {
-                        /* turn towards enemy */
-                        if (chaseTarget.object_index != obj_squad) {
-                            //turnRate *= 2;
-                            if (++chaseTimer &gt;= maxChaseTimer) {
-                                /* choose different target */
-                                chaseTarget = engagedSquad.squadMember[irandom(engagedSquad.squadSize-1)];
-                            }
-                        }
-                        else {
-                            /* enemy squad destroyed */
-                            engagedSquad = undefined;
-                            chaseTarget = assignedSquad;
-                            assignedSquad.isEngaged = false;
-                            isEngaged = false;
-                            chaseTimer = 0;
+                                }
+                                break;
                         }
                     }
                     else {
+                        /* no ammunition left, cannot engage */
+                        ds_list_clear(assignedSquad.coordinate_queue);
+                        engageSquad = noone;
+                        chaseTarget = assignedSquad;
+                        isEngaged = false;
+                        chaseTimer = 0;
+                        assignedSquad.canEngage = false;
+                        assignedSquad.isEngaged = false;
+                        assignedSquad.planesLanding = true;
+                        with(assignedSquad) {
+                            landSquad();
+                        }
+                    }
+                //}
+            }
+            var desiredAngle = predictedAim(direction,chaseTarget,20);
+            turnRate = angle_difference(desiredAngle,direction); //engaged direction
+            /* plane is engaging */
+            if (instance_exists(engageSquad)) {
+                if (combatRole == 0) {
+                    if (distance_to_object(assignedSquad) &gt; assignedSquad.baseEngageRange) {
                         //return to inital contact position
                         chaseTarget = assignedSquad;
+                    }
+                    else {
+                        chaseTarget = engageSquad.squadMember[irandom(engageSquad.membersAlive-1)];
                     }
                 }
             }
             else {
-                /* target destroyed, seeking different target */
-                if (combatRole == 0) {
-                    if (instance_exists(engagedSquad)) {
-                        chaseTarget = engagedSquad.squadMember[irandom(engagedSquad.squadSize-1)];
-                    }
-                    else {
-                        /* enemy squad destroyed */
-                        engagedSquad = undefined;
-                        chaseTarget = assignedSquad;
-                        assignedSquad.isEngaged = false;
-                        isEngaged = false;
-                        chaseTimer = 0;
-                    }
-                }
+                print("engaged squad was destroyed");
+                chaseTarget = noone;
             }
         }
-        var maxTurnRate = 1.5;
-        //if (isEngaged) {minTurnRate = 1;}
-        //turnRate = max(-maxTurnRate,min(maxTurnRate,turnRate/50)); // increase turn
-        moveSpeed = baseMoveSpeed/2;
-        if (chaseTarget != undefined) {
-            if (instance_exists(chaseTarget)) {
-                if (object_get_parent(chaseTarget.object_index) == obj_plane_parent) {
-                    if (chaseTarget.combatRole != 0) {
-                        moveSpeed = lerp(min(moveSpeed,chaseTarget.moveSpeed),max(moveSpeed,chaseTarget.moveSpeed),0.5);
-                    }
+        else {
+            /* target destroyed, seeking different target */
+            if (instance_exists(engageSquad)) {
+                if (combatRole == 0) {
+                   chaseTarget = engageSquad.squadMember[irandom(engageSquad.membersAlive-1)];
+                }
+            }
+            else {
+                /* enemy squad destroyed */
+                engageSquad = noone;
+                chaseTarget = assignedSquad;
+                assignedSquad.isEngaged = false;
+                isEngaged = false;
+                chaseTimer = 0;
+            }
+        }
+        /*var maxTurnRate = 1.5;
+        if (isEngaged) {minTurnRate = 1;}
+        turnRate = max(-maxTurnRate,min(maxTurnRate,turnRate/30)); // increase turn*/
+        moveSpeed = baseMoveSpeed;
+        if (instance_exists(chaseTarget)) {
+            if (object_get_parent(chaseTarget.object_index) == obj_plane_parent) {
+                if (chaseTarget.combatRole != 0) {
+                    moveSpeed = lerp(min(moveSpeed,chaseTarget.moveSpeed),max(moveSpeed,chaseTarget.moveSpeed),0.5);
                 }
             }
         }
     }
     else {
+        chaseTarget = assignedSquad;
         turnRate = angle_difference(point_direction(x,y,assignedSquad.x,assignedSquad.y),direction);
         if (distance_to_object(assignedSquad) &lt; assignedSquad.baseEngageRange/5) {
             turnRate = angle_difference(assignedSquad.direction,direction);
             withinSquadRange = true;
         }
-        turnRate = sign(turnRate);
-        moveSpeed = turnary(withinSquadRange,assignedSquad.speed,baseMoveSpeed/2);
-        chaseTarget = assignedSquad;
+        if (withinSquadRange) {
+            moveSpeed = assignedSquad.speed;
+        }
+        else {
+            addTurnRate = 2;
+            moveSpeed = baseMoveSpeed/2;
+        }
     }
     if (fire &lt;= 0) {fire++;}
     planeImageIndex = clamp(round(-(turnRate)+(image_number/2)),0,image_number-2);
     speed = var_wipe(speed,moveSpeed,100,0,0.1);
-    direction += sign(turnRate)*turnRateCof;
+    direction += sign(turnRate)*turnRateCof*addTurnRate;
 }
 else {
     if (takeOff) {

@@ -25,7 +25,7 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>shotFrom = undefined;
+            <string>shotFrom = noone;
 damage = 0;
 isBomb = false;
 isTorp = false;
@@ -64,6 +64,9 @@ part_type_life(smokeType,100,100);
             <kind>1</kind>
             <string>if (isBomb) {
     explosionEffect();
+}
+if (isTorpedo) {
+    explosionEffect(self,white);
 }
 if (instance_exists(shotFrom)) {
     if (object_get_parent(shotFrom.object_index) == obj_turret_par) {
