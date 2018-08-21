@@ -1,10 +1,13 @@
-///predictedAim(angle,target,projectileSpeed,[randomX],[randomY])
+///predictedAim(gunAngle,target,projectileSpeed,[randomX],[randomY])
 /*
     math used from
     https://stackoverflow.com/questions/2248876/2d-game-fire-at-a-moving-target-by-predicting-intersection-of-projectile-and-u
 */
 var angle = argument[0];
 var target = argument[1];
+if (target == undefined || (target != undefined && !instance_exists(target))) {
+    return angle;
+}
 var spd = argument[2];
 var randomX = 0;
 var randomY = 0;
@@ -14,7 +17,6 @@ if (argument_count >= 4) {
         randomY = irandom_range(-argument[4],argument[4]);
     }
 }
-
 var targetStartX = lerp(target.x,target.x+hspeed,-room_speed);
 var targetStartY = lerp(target.y,target.y+vspeed,-room_speed);
 

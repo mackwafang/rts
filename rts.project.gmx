@@ -36,6 +36,7 @@
     <sprite>sprites\spr_aa_turret_2</sprite>
     <sprite>sprites\spr_aa_turret_1</sprite>
     <sprite>sprites\spr_damage_font</sprite>
+    <sprite>sprites\spr_explosion_mark</sprite>
   </sprites>
   <backgrounds name="background">
     <background>background\background0</background>
@@ -73,13 +74,15 @@
     <object>objects\obj_bullet</object>
     <object>objects\obj_control</object>
     <object>objects\obj_explosion_sharpnel</object>
-    <object>objects\obj_runway</object>
     <object>objects\obj_bomb_target</object>
+    <object>objects\obj_runway</object>
+    <object>objects\obj_installation</object>
     <object>objects\obj_turret_par</object>
     <object>objects\obj_aa_turret_1</object>
     <object>objects\obj_aa_turret_2</object>
     <object>objects\obj_shell</object>
     <object>objects\obj_damage_ind</object>
+    <object>objects\obj_capture_zone</object>
   </objects>
   <rooms name="rooms">
     <room>rooms\room0</room>

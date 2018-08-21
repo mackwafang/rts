@@ -31,6 +31,7 @@ isBomb = false;
 isTorp = false;
 bulletLife = 0.3;
 isDestroyed = false;
+hitWater = false;
 
 smokeSystem = part_system_create();
 smokeType = part_type_create();
@@ -63,10 +64,7 @@ part_type_life(smokeType,100,100);
           <argument>
             <kind>1</kind>
             <string>if (isBomb) {
-    explosionEffect();
-}
-if (isTorpedo) {
-    explosionEffect(self,white);
+    explosionEffect(self,turnary(hitWater,white,0));
 }
 if (instance_exists(shotFrom)) {
     if (object_get_parent(shotFrom.object_index) == obj_turret_par) {
@@ -125,7 +123,8 @@ part_system_destroy(smokeSystem);
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if (isTorp) {
+            <string>if (isBomb) {if (!place_meeting(x,y,obj_bomb_target)) {hitWater = true;}}
+if (isTorp) {
     isDestroyed = true;
     alarm[1] = 100;
 }

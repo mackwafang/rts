@@ -162,7 +162,7 @@ if (target != noone) {
                 if (fire &gt;= 0 &amp;&amp; reloadTime &lt;= 0) {
                     fire -= fireRate;
                     reloadTime = maxReloadTime;
-                    if (accuracy &gt; 2) {accuracy--;}
+                    if (accuracy &gt; 1.5) {accuracy -= 0.25;}
                     for (var i = 0; i &lt; numberOfGuns; i++) {
                         var x_to = gunOffset[i*2];
                         var y_to = gunOffset[(i*2)+1];

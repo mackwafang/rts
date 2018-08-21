@@ -1,3 +1,2 @@
 ///turnary(condition,true,false);
-var cond = argument[0];
-if (cond) {return argument[1];} else {return argument[2];}
+if (argument[0]) {return argument[1];} else {return argument[2];}

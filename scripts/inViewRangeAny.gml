@@ -18,7 +18,7 @@ if (argument_count > 3) {
 if ((instance_number(target) > 0) && instance_exists(from)) {
     for (var i = 0; i < instance_number(target.object_index); i++) {
         var o = instance_find(target.object_index,i);
-        if (point_distance(o.x,o.y,from.x,from.y) <= range) {
+        if (point_distance(from.x,from.y,o.x,o.y) <= range) {
             /* Vector from to o */
             var x1 = turnary(inverse,from.x-o.x,o.x-from.x);
             var y1 = turnary(inverse,from.y-o.y,o.y-from.y);

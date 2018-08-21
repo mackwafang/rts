@@ -4,8 +4,8 @@ if (argument_count == 1) {
     queued = argument[0];
 }
 if (!planesTakingOff || !planesLanding) {
-    var xx = takeOffFrom.x+lengthdir_x(-256,takeOffFrom.direction);
-    var yy = takeOffFrom.y+lengthdir_y(-256,takeOffFrom.direction);
+    var xx = takeOffFrom.x+lengthdir_x(-320,takeOffFrom.direction);
+    var yy = takeOffFrom.y+lengthdir_y(-320,takeOffFrom.direction);
     if (queued) {
         if (!landingQueued) {
             ds_list_add(coordinate_queue,xx,yy);

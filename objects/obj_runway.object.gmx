@@ -25,7 +25,8 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>isAlly = true; //is runway part of player?
+            <string>event_inherited();
+isAlly = true; //is runway part of player?
 takeOff = false;
 landing = false;
 isDestroyed = false;
@@ -35,7 +36,6 @@ squadQueue = ds_queue_create();
 useTime = 0; //takeoff/landing time
 sendPlaneToSquad = undefined;
 maxUseTime = 30;
-event_inherited();
 isInstallation = true;
 </string>
           </argument>
@@ -102,7 +102,7 @@ if (!isDestroyed) {
                     canSend = true;
                 }
                 if (canSend) {
-                    sendPlaneToSquad.squadMember[sendPlaneToSquad.squadSize-planesRequired] = createPlane(x,y,direction,sendPlaneToSquad.planeType,sendPlaneToSquad,sendPlaneToSquad.isAlly,id,sendPlaneToSquad.squadSize-planesRequired);
+                    sendPlaneToSquad.squadMember[| sendPlaneToSquad.squadSize-planesRequired] = createPlane(x,y,direction,sendPlaneToSquad.planeType,sendPlaneToSquad,sendPlaneToSquad.isAlly,id,sendPlaneToSquad.squadSize-planesRequired);
                     with(sendPlaneToSquad) {
                         if (isEngaged) {
                             if (instance_exists(engageSquad)) {
@@ -113,7 +113,7 @@ if (!isDestroyed) {
                     print("sending out an aircraft, "+string(planesRequired)+" planes left");
                     planesRequired--;
                     useTime = maxUseTime;
-                    if (sendPlaneToSquad.squadSize-planesRequired &lt; 6) {
+                    if (sendPlaneToSquad.squadSize-planesRequired &lt; 10) {
                         sendPlaneToSquad.speed = min(sendPlaneToSquad.speed+0.25,6);
                     }
                     else {
@@ -134,7 +134,7 @@ if (!isDestroyed) {
                 if (sendPlaneToSquad != undefined) {
                     var planesTakenOff = 0;
                     for (var i = 0; i &lt; sendPlaneToSquad.squadSize; i++) {
-                        var p = sendPlaneToSquad.squadMember[i];
+                        var p = sendPlaneToSquad.squadMember[| i];
                         if (p != undefined) {
                             if (instance_exists(p)) {
                                 if (!p.takeOff) {

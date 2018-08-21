@@ -31,15 +31,15 @@ global.mapView = false;
 global.squadType[0] = 1;
 global.squadType[1] = 1;
 global.squadType[2] = 1;
-global.squadType[3] = 3;
-global.squadType[4] = 3;
-global.squadType[5] = 3;
+global.squadType[3] = 2;
+global.squadType[4] = 2;
+global.squadType[5] = 2;
 global.squadType[6] = 2;
 global.squadType[7] = 2;
 global.squadType[8] = 2;
-global.FF_size = 6;
-global.TB_size = 6;
-global.DB_size = 6;
+global.FF_size = 4;
+global.TB_size = 12;
+global.DB_size = 12;
 for (var i = 0; i &lt; MAX_SQUADS; i++) {
     global.squad[i] = noone;
     var time = 0;
@@ -217,10 +217,10 @@ draw_set_halign(fa_left);
 draw_text(0,0,string(mouse_x)+","+string(mouse_y));
 if (instance_exists(global.squad[0])) {
     for (var i = 0; i &lt; global.squad[0].squadSize; i++) {
-        if (instance_exists(global.squad[0].squadMember[i])) {
-            draw_text(0,16+(i*16),string(global.squad[0].squadMember[i])+": "+string(global.squad[0].squadMember[i].planeId));
-            draw_rectangle_colour(64,(i+1)*16,64+global.squad[0].squadMember[i].maxhp,(i+2)*16,0,0,0,0,false);
-            draw_rectangle_colour(64,(i+1)*16,64+global.squad[0].squadMember[i].hp,(i+2)*16,green,green,green,green,false);
+        if (global.squad[0].squadMember[| i] != undefined) {
+            draw_text(0,16+(i*16),string(global.squad[0].squadMember[| i])+": "+string(global.squad[0].squadMember[| i].planeId));
+            draw_rectangle_colour(64,(i+1)*16,64+global.squad[0].squadMember[| i].maxhp,(i+2)*16,0,0,0,0,false);
+            draw_rectangle_colour(64,(i+1)*16,64+global.squad[0].squadMember[| i].hp,(i+2)*16,green,green,green,green,false);
         }
     }
 }

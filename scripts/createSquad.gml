@@ -37,9 +37,6 @@ switch(planeType) {
         s.canEngage = false;
         break;
 }
-for (var i = 0; i < squadSize; i++) {
-    s.squadMember[i] = noone;
-}
 s.isAlly = isAlly;
 s.ai_control = aiControl;
 s.takeOffFrom = takeOffFrom;
@@ -48,7 +45,7 @@ s.ammo = s.maxAmmo;
 
 if (takeOffFrom == noone) {
     for (var i = 0; i < squadSize; i++) {
-        s.squadMember[i] = createPlane(s.x,s.y,irandom(360),planeType,s,isAlly,noone,i);
+        ds_list_add(s.squadMember[i],createPlane(s.x,s.y,irandom(360),planeType,s,isAlly,noone,i));
     }
     s.visible = true;
 }

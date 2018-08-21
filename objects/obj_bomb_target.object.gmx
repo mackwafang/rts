@@ -31,6 +31,34 @@ displayhp = hp;
 child = -1;
 isDestroyed = false;
 isInstallation = false;
+
+surface = surface_create(max(sprite_width,sprite_height),max(sprite_width,sprite_height));
+gridSize = 16;
+explosionMarkList = ds_list_create();
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="1" enumb="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>ds_list_destroy(explosionMarkList);
+surface_free(surface);
 </string>
           </argument>
         </arguments>
@@ -115,6 +143,9 @@ if ((child = object_get_parent(obj_bomb_target)) != -1) {
     if (other.alarm[0] &lt;= 2) {
         if (!isDestroyed) {
             hp -= other.damage;
+            var xx = (sprite_width-sprite_xoffset)+(other.x-x);
+            var yy = (sprite_height-sprite_yoffset)+(other.y-y);
+            ds_list_add(explosionMarkList,xx,yy,irandom(5));
             alarm[0] = 120;
             instance_destroy(other);
         }
@@ -125,6 +156,7 @@ if (isInstallation) {
         if (!isDestroyed &amp;&amp; !other.isDestroyed) {
             hp -= other.damage;
             alarm[0] = 120;
+            explosionEffect(other,white);
             other.isDestroyed = true;
         }
     }
@@ -159,8 +191,8 @@ if (!child.isAlly) {
 }
 var x1 = xx-100;
 var x2 = xx-100;
-var y1 = yy-sprite_height-10;
-var y2 = yy-sprite_height;
+var y1 = yy-(sprite_height*windowRatio_x/2)-10;
+var y2 = yy-(sprite_height*windowRatio_y/2);
 var w = 2;
 draw_rectangle_colour(x1-w,y1-w,x2+200+w,+y2+w,0,0,0,0,false);
 draw_rectangle_colour(x1,y1,x2+((displayhp/maxhp)*200),y2,white,white,white,white,false);
@@ -168,7 +200,50 @@ draw_rectangle_colour(x1,y1,x2+((hp/maxhp)*200),y2,color,color,color,color,false
 draw_set_font(global.gameFont);
 draw_set_valign(fa_bottom);
 draw_set_halign(fa_center);
-draw_text(xx,yy-sprite_height,string(hp)+"/"+string(maxhp));
+draw_text(xx,y2,string(hp)+"/"+string(maxhp));
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="8" enumb="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>if (surface_exists(surface)) {
+    var x_origin = (sprite_width-sprite_xoffset);
+    var y_origin = (sprite_height-sprite_yoffset);
+    draw_surface(surface,x-x_origin,y-y_origin);
+    surface_set_target(surface);
+    draw_sprite(sprite_index,0,x_origin,y_origin);
+    surface_reset_target();
+    
+    surface_set_target(surface);
+    draw_set_colour_write_enable(1,1,1,0);
+    for (var i = 0; i &lt; ds_list_size(explosionMarkList)-2; i += 3) {
+        var xx = explosionMarkList[| i];
+        var yy = explosionMarkList[| i+1];
+        draw_sprite(spr_explosion_mark,explosionMarkList[| i+2],xx,yy);
+    }
+    draw_set_colour_write_enable(1,1,1,1);
+    surface_reset_target();
+}
+else {
+    surface = surface_create(max(sprite_width,sprite_height),max(sprite_width,sprite_height));
+}
 </string>
           </argument>
         </arguments>

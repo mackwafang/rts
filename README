@@ -2,6 +2,14 @@ rts (name TBD) by mackwafang:
 
 Change Log:
 
+ver 0.3.6.4:
+	- Added random attack location for bombers
+	- Added capture zones
+	- Added flight formation for squads
+	- Changed data structure of storing squad members from array to list
+	- Fixed a bug where bombers would not fire rear guns
+	- Revamped bomber engagement
+
 ver 0.3.6.3:
 	- Fixed a bug where fighters reduce speed during an engagement
 	- Changed internal method of giving squad orders
