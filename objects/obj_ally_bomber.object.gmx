@@ -26,7 +26,6 @@
           <argument>
             <kind>1</kind>
             <string>event_inherited();
-maxhp += 25;
 hp = maxhp;
 attack = 100;
 chaseTarget = obj_squad;

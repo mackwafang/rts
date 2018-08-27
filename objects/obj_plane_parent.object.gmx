@@ -146,6 +146,8 @@ if ((!takeOff &amp;&amp; !landing)) {
         }
     }
     if (isEngaged) {
+        // plane is engaged in combat
+        moveSpeed = baseMoveSpeed;
         if (chaseTarget != undefined) {
             var desiredAngle = direction;
             var objectInRange = false;
@@ -217,7 +219,7 @@ if ((!takeOff &amp;&amp; !landing)) {
                         }
                     }
                     else {
-                        /* no ammunition left, cannot engage */
+                        /* no ammunition left, disengage and return to takeoff point*/
                         ds_list_clear(assignedSquad.coordinate_queue);
                         engageSquad = noone;
                         chaseTarget = assignedSquad;
@@ -243,6 +245,7 @@ if ((!takeOff &amp;&amp; !landing)) {
                     }
                     else {
                         chaseTarget = engageSquad.squadMember[| irandom(ds_list_size(engageSquad.squadMember)-1)];
+                        moveSpeed = lerp(min(moveSpeed,chaseTarget.moveSpeed),max(moveSpeed,chaseTarget.moveSpeed),0.5);
                     }
                 }
             }
@@ -254,11 +257,11 @@ if ((!takeOff &amp;&amp; !landing)) {
             /* target destroyed, seeking different target */
             if (instance_exists(engageSquad)) {
                 if (combatRole == 0) {
-                   chaseTarget = engageSquad.squadMember[| irandom(ds_list_size(engageSquad.squadMember)-1)];
+                    chaseTarget = engageSquad.squadMember[| irandom(ds_list_size(engageSquad.squadMember)-1)];
                 }
             }
             else {
-                /* enemy squad destroyed */
+                /* enemy squad destroyed, return to normal behavior */
                 engageSquad = noone;
                 chaseTarget = assignedSquad;
                 assignedSquad.isEngaged = false;
@@ -270,17 +273,6 @@ if ((!takeOff &amp;&amp; !landing)) {
         /*var maxTurnRate = 1.5;
         if (isEngaged) {minTurnRate = 1;}
         turnRate = max(-maxTurnRate,min(maxTurnRate,turnRate/30)); // increase turn*/
-        moveSpeed = baseMoveSpeed;
-        if (chaseTarget != undefined) {
-            if (instance_exists(chaseTarget)) {
-                if (object_get_parent(chaseTarget.object_index) == obj_plane_parent) {
-                    if (chaseTarget.combatRole != 0) {
-                        /* change speed for fighter v bomber engagement */
-                        moveSpeed = lerp(min(moveSpeed,chaseTarget.moveSpeed),max(moveSpeed,chaseTarget.moveSpeed),0.5);
-                    }
-                }
-            }
-        }
         if (combatRole != 0) {
             moveSpeed = baseMoveSpeed*0.5;
         }
@@ -346,7 +338,7 @@ else {
                 angle = angle_difference(point_direction(x,y,takeOffFrom.x,takeOffFrom.y),direction)/20;
                 if (place_meeting(x,y,takeOffFrom)) {
                     angle = angle_difference(takeOffFrom.direction,direction)/20;
-                    speed = var_wipe(speed,0,100,0,0.01);
+                    speed = var_wipe(speed,0,100,0,0.02);
                     image_xscale = var_wipe(image_xscale,0.5,100,0.1,0);
                     image_yscale = var_wipe(image_yscale,0.5,100,0.1,0);
                     if ((image_xscale &lt;= 0.5) &amp;&amp; (image_yscale &lt;= 0.5)) {

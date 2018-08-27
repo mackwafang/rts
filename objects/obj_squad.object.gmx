@@ -287,13 +287,13 @@ if (!planesTakingOff) {
                     }
                 }
             }
-            if (landingQueued) {
-                landingQueued = false;
-                planesLanding = true;
-            }
             if (ds_list_size(coordinate_queue) &lt; 2) {
                 angle = angle_difference(point_direction(x,y,dest_x,dest_y)+90,direction);
                 isIdling = true;
+                if (landingQueued) {
+                    landingQueued = false;
+                    planesLanding = true;
+                }
                 /* set bombers to attack */
                 if (instance_exists(escortSquad)) {
                     if (object_get_parent(escortSquad.object_index) == obj_bomb_target) {
