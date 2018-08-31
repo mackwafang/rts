@@ -2,6 +2,10 @@ rts (name TBD) by mackwafang:
 
 Change Log:
 
+ver 0.3.6.5.1:
+	- Added accuracy parameter for bombers
+	- Additional bug fix
+
 ver 0.3.6.5:
 	- Fixed a bug where squadrons would return after moving to the 2nd waypoint
 	- Changes to internal logic for aircrafts

@@ -46,6 +46,7 @@ fireRate = 7; //fire rate
 maxhp = 50;
 hp = maxhp;
 attack = 2;
+accuracy = 0.6;
 damage = 0;
 bombsDropped = false;
 
@@ -153,10 +154,10 @@ if ((!takeOff &amp;&amp; !landing)) {
             var objectInRange = false;
             if (combatRole != 0) {
                 var target = assignedSquad.escortSquad;
-                if (target != noone) {
+                if (target != noone &amp;&amp; instance_exists(target)) {
                     if ((attacking_x == 0) &amp;&amp; (attacking_y == 0)) {
-                        attacking_x = irandom((min(target.sprite_height,target.sprite_width)*0.85) div 2)*choose(-1,1);
-                        attacking_y = irandom((min(target.sprite_height,target.sprite_width)*0.85) div 2)*choose(-1,1);
+                        attacking_x = irandom((max(target.sprite_height,target.sprite_width)*(1.2-accuracy)) div 2)*choose(-1,1);
+                        attacking_y = irandom((max(target.sprite_height,target.sprite_width)*(1.2-accuracy)) div 2)*choose(-1,1);
                     }
                     objectInRange = (point_distance(x,y,target.x+attacking_x,target.y+attacking_y) &lt; fovRange);
                 }

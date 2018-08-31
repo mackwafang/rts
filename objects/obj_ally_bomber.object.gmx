@@ -27,7 +27,7 @@
             <kind>1</kind>
             <string>event_inherited();
 hp = maxhp;
-attack = 100;
+attack = 1000;
 chaseTarget = obj_squad;
 turnRateCof = 0.9;
 combatRole = 2;
