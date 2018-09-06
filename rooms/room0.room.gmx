@@ -53,11 +53,11 @@
   <instances>
     <instance objName="obj_control" x="0" y="0" name="inst_A8505E2E" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_runway" x="136" y="920" name="inst_A225A3F8" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="obj_runway" x="856" y="40" name="inst_855E46C1" locked="0" code="isAlly = false;&#xA;direction = 270;&#xA;maxhp *= 10;&#xA;hp = maxhp;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="obj_runway" x="856" y="40" name="inst_855E46C1" locked="0" code="isAlly = false;&#xA;direction = 270;&#xA;maxhp *= 10;&#xA;hp = maxhp;&#xA;displayhp = hp;&#xA;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_capture_zone" x="176" y="208" name="inst_F30C9AB6" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_capture_zone" x="784" y="768" name="inst_00939730" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_capture_zone" x="488" y="480" name="inst_9D62CDDC" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="obj_installation" x="320" y="240" name="inst_589E5746" locked="0" code="isAlly = false;&#xA;direction = 270;&#xA;maxhp *= 100;&#xA;hp = maxhp;&#xA;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="obj_installation" x="320" y="240" name="inst_589E5746" locked="0" code="isAlly = false;&#xA;direction = 270;&#xA;maxhp *= 100;&#xA;hp = maxhp;&#xA;displayhp = hp;&#xA;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
   </instances>
   <tiles/>
   <PhysicsWorld>0</PhysicsWorld>

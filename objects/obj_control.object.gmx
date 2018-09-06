@@ -38,8 +38,8 @@ global.squadType[6] = 2;
 global.squadType[7] = 2;
 global.squadType[8] = 2;
 global.FF_size = 4;
-global.TB_size = 12;
-global.DB_size = 12;
+global.TB_size = 4;
+global.DB_size = 4;
 for (var i = 0; i &lt; MAX_SQUADS; i++) {
     global.squad[i] = noone;
     var time = 0;
@@ -58,7 +58,7 @@ for (var i = 0; i &lt; MAX_SQUADS; i++) {
             size = global.TB_size;
             break;
     }
-    global.squadInitDelayTime[i] = 30*(time*size)*0;
+    global.squadInitDelayTime[i] = 30*(time*size);
     global.squadDelayTime[i] = global.squadInitDelayTime[i];
 }
 global.squadsInCommand = MAX_SQUADS;
@@ -224,6 +224,9 @@ if (instance_exists(global.squad[0])) {
         }
     }
 }
+draw_set_valign(fa_top);
+draw_set_halign(fa_right);
+draw_text(wv,0,fps);
 for (var i = 0; i &lt; global.squadsInCommand; i++) {
     var s = global.squad[i];
     var align = global.squadsInCommand mod 2;

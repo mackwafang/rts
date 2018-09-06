@@ -160,8 +160,8 @@ if ((!takeOff &amp;&amp; !landing)) {
                         attacking_y = irandom((max(target.sprite_height,target.sprite_width)*(1.2-accuracy)) div 2)*choose(-1,1);
                     }
                     objectInRange = (point_distance(x,y,target.x+attacking_x,target.y+attacking_y) &lt; fovRange);
+                    desiredAngle = point_direction(x,y,target.x+attacking_x,target.y+attacking_y);
                 }
-                desiredAngle = point_direction(x,y,target.x+attacking_x,target.y+attacking_y);
             }
             else {
                 desiredAngle = predictedAim(direction,chaseTarget,20);
@@ -240,11 +240,13 @@ if ((!takeOff &amp;&amp; !landing)) {
             /* plane is engaging */
             if (instance_exists(engageSquad) &amp;&amp; instance_exists(assignedSquad)) {
                 if (combatRole == 0) {
-                    if (distance_to_object(assignedSquad) &gt; assignedSquad.baseEngageRange) {
+                    if (distance_to_object(assignedSquad) &gt; min(distance_to_object(engageSquad),assignedSquad.baseEngageRange)) {
                         //return to inital contact position
                         chaseTarget = assignedSquad;
+                        addTurnRate += 2;
                     }
                     else {
+                        /* select random enemy from enemy's squad */
                         chaseTarget = engageSquad.squadMember[| irandom(ds_list_size(engageSquad.squadMember)-1)];
                         moveSpeed = lerp(min(moveSpeed,chaseTarget.moveSpeed),max(moveSpeed,chaseTarget.moveSpeed),0.5);
                     }
