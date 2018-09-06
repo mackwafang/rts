@@ -67,10 +67,13 @@ zoneName = string(instance_number(obj_capture_zone));
         }
     }
 }
-if (isNeutral ||(isAlly &amp;&amp; (alliesInRange &gt; 0)) || (!isAlly &amp;&amp; (enemiesInRange &gt; 0))) {
+if (!isNeutral ||(isAlly &amp;&amp; (alliesInRange &gt; 0)) || (!isAlly &amp;&amp; (enemiesInRange &gt; 0))) {
     isCapturing = true;
 }
-if ((isCapturing) &amp;&amp;(alliesInRange != enemiesInRange)) {
+else {
+    isCapturing = false;
+}
+if ((isCapturing) || (alliesInRange != enemiesInRange)) {
     /* capture the objective */
     var lastCaptureTime = captureTime;
     captureTime += alliesInRange-enemiesInRange;
@@ -92,7 +95,15 @@ if ((isCapturing) &amp;&amp;(alliesInRange != enemiesInRange)) {
 }
 else if (!isCapturing) {
     /* removes capture points when no squad is capturing*/
-    captureTime = var_wipe(captureTime,0,100,0,1);
+    if (isNeutral) {
+        captureTime = var_wipe(captureTime,0,100,0,1);
+    }
+    if (isAlly) {
+        captureTime = var_wipe(captureTime,maxCaptureTime,100,0,1);
+    }
+    else {
+        captureTime = var_wipe(captureTime,-maxCaptureTime,100,0,1);
+    }
 }
 captureTime = clamp(captureTime,-maxCaptureTime,maxCaptureTime);
 alliesInRange = 0;
@@ -146,7 +157,7 @@ if (!isNeutral) {
     draw_circle_colour(x,y,radius,c,c,false);
     draw_set_alpha(1);
 }
-draw_text(x,y,string(captureTime));
+draw_text(x,y,captureTime);
 </string>
           </argument>
         </arguments>

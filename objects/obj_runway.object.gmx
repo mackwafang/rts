@@ -32,7 +32,7 @@ landing = false;
 isDestroyed = false;
 
 planesRequired = 0; //number of planes required to send out or take in
-squadQueue = ds_queue_create();
+squadQueue = ds_list_create();
 useTime = 0; //takeoff/landing time
 sendPlaneToSquad = undefined;
 maxUseTime = 30;
@@ -122,8 +122,9 @@ if (!isDestroyed) {
                     sendPlaneToSquad.direction = image_angle;
                 }
                 else {
-                    ds_queue_enqueue(squadQueue,sendPlaneToSquad);
-                    sendPlaneToSquad = ds_queue_dequeue(squadQueue);
+                    ds_list_add(squadQueue,sendPlaneToSquad);
+                    sendPlaneToSquad = squadQueue[| 0];
+                    ds_list_delete(squadQueue,0);
                     planeType = sendPlaneToSquad.planeType;
                     planesRequired = sendPlaneToSquad.squadSize;
                     sendPlaneToSquad.visible = true;
@@ -151,9 +152,10 @@ if (!isDestroyed) {
                             sendPlaneToSquad.planesTakingOff = false;
                         }
                     }
-                    if (ds_queue_size(squadQueue) &gt; 0) {
+                    if (ds_list_size(squadQueue) &gt; 0) {
                         //sending planes for next squad in line
-                        sendPlaneToSquad = ds_queue_dequeue(squadQueue);
+                        sendPlaneToSquad = squadQueue[| 0];
+                        ds_list_delete(squadQueue,0);
                         planeType = sendPlaneToSquad.planeType;
                         planesRequired = sendPlaneToSquad.squadSize;
                         sendPlaneToSquad.visible = true;

@@ -55,7 +55,7 @@ else {
     s.dest_x = xx;
     s.dest_y = yy;
     s.planesTakingOff = true;
-    ds_queue_enqueue(takeOffFrom.squadQueue,s);
+    ds_list_add(takeOffFrom.squadQueue,s);
     takeOffFrom.takeOff = true;
 }
 return s;

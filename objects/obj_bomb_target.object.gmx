@@ -81,11 +81,8 @@ surface_free(surface);
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if (displayhp == hp) {
-    alarm[0] = -1;
-}
-else {
-    displayhp = var_wipe(displayhp,hp,100,0,maxhp*0.005);
+            <string>if (displayhp != hp) {
+    displayhp = var_wipe(displayhp,hp,100,0.05,0);
     alarm[0] = 1;
 }
 </string>
