@@ -65,9 +65,15 @@ global.squadsInCommand = MAX_SQUADS;
 global.selectedSquad = 0;
 global.mouseOnObject = noone;
 
+for (var i = 0; i &lt; MAX_SQUADS; i++) {
+    global.timeAdded[i] = 0;
+    global.timeAddedIndicator[i] = 0;
+}
+
 cooldownFont = font_add_sprite_ext(spr_cooldown_font,"0123456789.:",false,-7);
 global.gameFont = font_add_sprite(spr_squad_font,ord("!"),true,1);
-squadFont = font_add_sprite(spr_squad_font,ord("!"),true,1);
+squadFont = font_add_sprite(spr_squad_font,ord("!"),true,0);
+smallFont = font_add_sprite_ext(spr_small_font,"0123456789+",false,-5);
 display_set_gui_size(view_wport[0],view_hport[0]);
 </string>
           </argument>
@@ -106,6 +112,12 @@ if ((49 &lt;= key) &amp;&amp; (key &lt;= 57)) {
 }
 /* squad delay timer */
 for (var i = 0; i &lt; MAX_SQUADS; i++) {
+    if (global.timeAddedIndicator[i] &lt;= 0) {
+        global.timeAdded[i] = 0;
+    }
+    else {
+        global.timeAddedIndicator[i] = global.timeAddedIndicator[i]*0.9;
+    }
     if (global.squadDelayTime[i] &gt; -149) {
         global.squadDelayTime[i] -= 1;
     }
@@ -242,6 +254,14 @@ for (var i = 0; i &lt; global.squadsInCommand; i++) {
     }
     draw_sprite_ext(spr_squad_number,i,xx,hv-8,1,1,0,green,1);
     if (global.squadDelayTime[i] &gt; 0) {
+        if (global.timeAddedIndicator[i] &gt; 0) {
+            draw_set_font(squadFont);
+            draw_set_valign(fa_bottom);
+            draw_set_halign(fa_center);
+            draw_set_alpha(global.timeAddedIndicator[i]);
+            draw_text(xx,yy-h/2,"+"+string(global.timeAdded[i]));
+            draw_set_alpha(1);
+        }
         draw_set_valign(fa_middle);
         draw_set_halign(fa_center);
         draw_set_font(cooldownFont);

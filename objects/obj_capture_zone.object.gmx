@@ -93,11 +93,11 @@ if ((isCapturing) || (alliesInRange != enemiesInRange)) {
         }
     }
 }
-else if (!isCapturing) {
-    /* removes capture points when no squad is capturing*/
-    if (isNeutral) {
-        captureTime = var_wipe(captureTime,0,100,0,1);
-    }
+/* removes capture points when no squad is capturing*/
+if (isNeutral) {
+    captureTime = var_wipe(captureTime,0,100,0,1);
+}
+else {
     if (isAlly) {
         captureTime = var_wipe(captureTime,maxCaptureTime,100,0,1);
     }

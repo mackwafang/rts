@@ -37,6 +37,8 @@
     <sprite>sprites\spr_aa_turret_1</sprite>
     <sprite>sprites\spr_damage_font</sprite>
     <sprite>sprites\spr_explosion_mark</sprite>
+    <sprite>sprites\spr_small_font</sprite>
+    <sprite>sprites\spr_clock_icon</sprite>
   </sprites>
   <backgrounds name="background">
     <background>background\background0</background>

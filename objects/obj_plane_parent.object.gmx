@@ -240,7 +240,7 @@ if ((!takeOff &amp;&amp; !landing)) {
             /* plane is engaging */
             if (instance_exists(engageSquad) &amp;&amp; instance_exists(assignedSquad)) {
                 if (combatRole == 0) {
-                    if (distance_to_object(assignedSquad) &gt; min(distance_to_object(engageSquad),assignedSquad.baseEngageRange)) {
+                    if (distance_to_object(assignedSquad) &gt; max(distance_to_object(engageSquad),assignedSquad.baseEngageRange)) {
                         //return to inital contact position
                         chaseTarget = assignedSquad;
                         addTurnRate += 2;

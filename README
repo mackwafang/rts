@@ -2,6 +2,10 @@ rts (name TBD) by mackwafang:
 
 Change Log:
 
+ver 0.3.6.5.3:
+	- Fixed capture zone points removal
+	- Added time added indicator for squad arming time
+
 ver 0.3.6.5.2:
 	- Fixed a bug where planes would not destroy when it runs out of HP
 	- Add additional turn rate for planes during engagement

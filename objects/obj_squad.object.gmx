@@ -108,7 +108,10 @@ if (isAlly) {
                 time = TB_ARMING_TIME;
                 break;
         }
-        global.squadDelayTime[squadNumber] += round(time*membersShotDown)*60;
+        var timeAdded = membersShotDown;
+        global.timeAdded[squadNumber] = timeAdded;
+        global.timeAddedIndicator[squadNumber] = 5;
+        global.squadDelayTime[squadNumber] += timeAdded;
     }
 }
 ds_list_destroy(coordinate_queue);
